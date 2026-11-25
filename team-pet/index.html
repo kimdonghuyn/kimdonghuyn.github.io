@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>팀 펫 — 작업표시줄 위의 작은 동물 마을</title>
+<meta name="description" content="작업표시줄 위 작은 동물들로 대화하는 팀 메신저. 동료를 골대에 날려 넣고, 눈덩이를 던지고, 점심엔 같이 낚시해요. Windows · macOS, 무료.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="팀 펫 — 우리 팀만의 작은 동물 마을">
+<meta property="og:description" content="작업표시줄 위 작은 동물들로 대화하는 팀 메신저. 날려버리기 · 눈덩이 · 낚시 · 같이 하는 게임.">
+<meta property="og:url" content="https://kimdonghuyn.github.io/team-pet/">
+<meta property="og:image" content="https://kimdonghuyn.github.io/team-pet/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/png" href="assets/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="pets.css">
+<link rel="stylesheet" href="tour.css">
+<style>
+:root{--sky:#CDEBFF;--grass:#8FD16E;--grass2:#74BC55;--path:#F3DDAF;--wood:#9A6638;--ink:#24331F;--soft:#4B5D45;--leaf:#2F7A3D}
+*{box-sizing:border-box}
+body{margin:0;background:#FFFBF2;color:var(--ink);font-family:'Noto Sans KR',sans-serif}
+h1,h2,h3{font-family:'Jua',sans-serif;font-weight:400;margin:0}
+a{color:var(--leaf)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+.top{position:absolute;left:0;right:0;top:0;z-index:20}
+.top .wrap{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding-top:22px}
+.logo{display:flex;align-items:center;gap:8px;font-family:'Jua',sans-serif;font-size:26px}
+.top nav{display:flex;gap:8px;flex-wrap:wrap}
+.top nav a{background:#fff;color:var(--ink);text-decoration:none;border-radius:999px;padding:8px 14px;font-size:14px;box-shadow:0 2px 0 rgba(0,0,0,.08)}
+.top nav a:hover{background:#FFF4CC}
+
+/* ── The village: one scene, every spot doing one thing the pet does ── */
+.village{position:relative;height:1000px;min-width:1100px;background:var(--sky);overflow:hidden}
+.scroller{overflow-x:auto}
+.sun{position:absolute;right:9%;top:84px;width:70px;height:70px;border-radius:50%;background:#FFE27A;box-shadow:0 0 0 14px rgba(255,226,122,.35)}
+.cloud{position:absolute;height:26px;background:#fff;border-radius:20px;animation:drift 46s linear infinite}
+.cloud::before{content:"";position:absolute;left:18px;top:-14px;width:34px;height:34px;border-radius:50%;background:#fff}
+@keyframes drift{from{transform:translateX(-160px)}to{transform:translateX(1500px)}}
+.title{position:absolute;left:50%;top:104px;transform:translateX(-50%);text-align:center;width:640px;z-index:12}
+.title h1{font-size:62px;line-height:1.12}
+.title p{margin:14px auto 0;font-size:18px;line-height:1.7;color:var(--soft);max-width:560px}
+.cta{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:20px}
+.btn{display:inline-flex;align-items:center;gap:10px;min-height:50px;padding:0 22px;border-radius:14px;font-weight:700;text-decoration:none;box-shadow:0 4px 0 rgba(0,0,0,.15)}
+.btn.go{background:#2F7A3D;color:#fff}.btn.go:hover{background:#286A34}
+.btn.mac{background:#fff;color:var(--ink)}.btn.mac:hover{background:#FFF4CC}
+.hill{position:absolute;border-radius:50% 50% 0 0;background:var(--grass2)}
+.ground{position:absolute;left:0;right:0;bottom:0;height:520px;background:var(--grass)}
+.road{position:absolute;left:-5%;right:-5%;bottom:150px;height:44px;background:var(--path);transform:rotate(-1.5deg)}
+.sign{position:absolute;z-index:8;display:flex;flex-direction:column;align-items:center;text-decoration:none}
+.sign span{background:var(--wood);color:#FFF4E0;font-family:'Jua',sans-serif;font-size:16px;padding:5px 11px;border-radius:8px;box-shadow:0 3px 0 #6E4524;white-space:nowrap}
+.sign i{width:5px;height:18px;background:#6E4524;display:block}
+.sign:hover span{background:#B07A48}
+.tag{position:absolute;z-index:9;font-family:'Jua',sans-serif;font-size:20px;white-space:nowrap}
+.pet{z-index:6}
+.bub{z-index:10}
+
+/* sky things */
+.ufo{position:absolute;top:150px;left:0;width:120px;height:110px;animation:ufo 22s linear infinite;z-index:7}
+.ufo .disc{position:absolute;left:10px;top:20px;width:100px;height:26px;border-radius:50%;background:#B8B3D9;box-shadow:inset 0 -6px 0 #8E87C2}
+.ufo .dome{position:absolute;left:36px;top:2px;width:48px;height:30px;border-radius:50% 50% 0 0;background:#E3F4FF;border:3px solid #8E87C2;border-bottom:0}
+.ufo .beam{position:absolute;left:30px;top:44px;width:60px;height:62px;background:rgba(255,240,150,.45);clip-path:polygon(25% 0,75% 0,100% 100%,0 100%)}
+.ufo .pet{left:34px;top:58px}
+@keyframes ufo{0%{transform:translate(-200px,0)}50%{transform:translate(700px,30px)}100%{transform:translate(1600px,0)}}
+.burst{position:absolute;width:6px;height:6px;border-radius:50%}
+.burst i{position:absolute;left:0;top:0;width:6px;height:6px;border-radius:50%;animation:spark 2.4s ease-out infinite}
+@keyframes spark{0%,10%{transform:translate(0,0);opacity:0}20%{opacity:1}70%{opacity:1}100%{transform:translate(var(--x),var(--y));opacity:0}}
+.rocket{position:absolute;right:20%;top:250px;animation:rocket 4s ease-in infinite;z-index:7}
+@keyframes rocket{0%{transform:translate(0,0) rotate(0)}100%{transform:translate(160px,-260px) rotate(720deg);opacity:0}}
+.star{position:absolute;width:4px;height:4px;background:#FFD666;border-radius:50%}
+
+/* back row */
+.forge{position:absolute;left:3%;bottom:400px;width:120px;height:86px}
+.forge .house{position:absolute;left:0;bottom:0;width:120px;height:58px;background:#B9785A;border-radius:4px}
+.forge .roof{position:absolute;left:-8px;bottom:56px;width:136px;height:30px;background:#7B3F2C;clip-path:polygon(10% 0,90% 0,100% 100%,0 100%)}
+.anvil{position:absolute;left:132px;bottom:0;width:44px;height:22px;background:#4B5563;clip-path:polygon(0 0,100% 0,80% 40%,80% 100%,20% 100%,20% 40%)}
+.sparkle{position:absolute;width:5px;height:5px;background:#FFC83D;border-radius:50%;animation:fly 1.2s ease-out infinite}
+@keyframes fly{0%{transform:translate(0,0);opacity:1}100%{transform:translate(var(--x),var(--y));opacity:0}}
+.stage{position:absolute;left:25%;bottom:404px;width:220px;height:24px;background:#6B4FA3;border-radius:6px;box-shadow:0 6px 0 #4E3780}
+.light{position:absolute;bottom:428px;width:70px;height:120px;background:rgba(255,236,150,.4);clip-path:polygon(40% 0,60% 0,100% 100%,0 100%)}
+.dance{animation:pet-talk .3s steps(1) infinite,bob .6s ease-in-out infinite}
+@keyframes bob{0%,100%{translate:0 0}50%{translate:0 -10px}}
+.duel{position:absolute;left:56%;bottom:420px;width:150px;height:6px;background:#C49A6C;border-radius:3px}
+.snowfield{position:absolute;right:-3%;bottom:420px;width:380px;height:200px;border-radius:50% 50% 0 0;background:#F4F8FF}
+.ball{position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px #C9D8EE;animation:throw 2.4s ease-in infinite;z-index:7}
+@keyframes throw{0%{transform:translate(0,0)}60%{transform:translate(-80px,-40px)}100%{transform:translate(-150px,6px);opacity:0}}
+
+/* middle row */
+.pond{position:absolute;left:2%;bottom:250px;width:280px;height:90px;border-radius:50%;background:#5AAFE0;box-shadow:inset 0 -8px 0 #3E8FC2}
+.jump{position:absolute;width:20px;height:11px;background:#FF9F5A;border-radius:60% 40% 40% 60%;animation:jump 2.6s ease-in-out infinite;z-index:6}
+@keyframes jump{0%,55%,100%{transform:translate(0,0) rotate(0);opacity:0}65%{opacity:1;transform:translate(10px,-30px) rotate(-30deg)}80%{opacity:1;transform:translate(24px,-6px) rotate(40deg)}}
+.podium{position:absolute;bottom:250px;width:44px;font-family:'Jua',sans-serif;text-align:center;font-size:16px;color:#4A3B12;border-radius:4px 4px 0 0}
+.fountain{position:absolute;left:37%;bottom:262px;width:130px;height:42px;border-radius:50%;background:#B9DDF0;border:6px solid #E4D7BF}
+.easel{position:absolute;left:53%;bottom:270px;width:74px;height:64px;background:#fff;border:4px solid var(--wood);border-radius:4px;z-index:5}
+.easel::after{content:"";position:absolute;left:50%;bottom:-30px;width:4px;height:28px;background:var(--wood)}
+.hoop{position:absolute;width:60px;height:110px;z-index:5}
+.hoop .pole{position:absolute;right:0;top:0;width:7px;height:110px;background:#6B7280}
+.hoop .board{position:absolute;right:7px;top:6px;width:9px;height:40px;background:#fff;border:2px solid #9CA3AF}
+.hoop .rim{position:absolute;right:16px;top:34px;width:38px;height:5px;background:#F08A3C}
+.arc{animation:arcb 3s cubic-bezier(.3,.1,.5,1) infinite}
+@keyframes arcb{0%{transform:translate(0,0) rotate(0)}50%{transform:translate(90px,-120px) rotate(240deg)}85%{transform:translate(160px,-50px) rotate(480deg)}100%{transform:translate(160px,-50px);opacity:0}}
+.tower{position:absolute;left:83%;bottom:262px;display:flex;flex-direction:column-reverse;align-items:center;z-index:5}
+.slide{position:absolute;left:calc(83% - 20px);bottom:368px;width:40px;height:14px;border-radius:3px;background:#FF9F5A;animation:slide 1.6s ease-in-out infinite alternate;z-index:5}
+@keyframes slide{from{transform:translateX(0)}to{transform:translateX(64px)}}
+.tower b{display:block;height:14px;border-radius:3px;margin-top:2px}
+.drop{animation:drop 2.4s ease-in infinite}
+@keyframes drop{0%{transform:translateY(-60px);opacity:0}15%{opacity:1}55%,100%{transform:translateY(0)}}
+.green{position:absolute;right:2%;bottom:250px;width:150px;height:40px;border-radius:50%;background:#5FB44A}
+.flag{position:absolute;right:calc(2% + 52px);bottom:268px;width:3px;height:70px;background:#fff;z-index:5}
+.flag::after{content:"";position:absolute;left:3px;top:0;width:24px;height:16px;background:#F28482;clip-path:polygon(0 0,100% 50%,0 100%)}
+.cup{position:absolute;right:calc(2% + 46px);bottom:264px;width:20px;height:7px;border-radius:50%;background:#10301F;z-index:5}
+.roll{animation:roll 3.4s ease-out infinite}
+@keyframes roll{0%{transform:translate(-70px,-50px) rotate(0)}40%{transform:translate(-36px,0) rotate(200deg)}100%{transform:translate(0,0) rotate(400deg)}}
+
+/* front row */
+.raincloud{position:absolute;left:3%;bottom:180px;width:150px;height:36px;background:#9AA8B8;border-radius:20px;z-index:7}
+.raincloud::before{content:"";position:absolute;left:30px;top:-18px;width:50px;height:44px;border-radius:50%;background:#9AA8B8}
+.drop2{position:absolute;width:2px;height:10px;background:#6FA8DC;animation:rain .8s linear infinite;z-index:6}
+@keyframes rain{from{transform:translateY(0)}to{transform:translateY(110px)}}
+/* Each animal's own umbrella, drawn as the pet draws it (server/pet.ps1 Umbrella): see umbrellaSvg below. */
+.umb{position:absolute;z-index:8;line-height:0}
+.umb svg{overflow:visible;transform:rotate(-9deg);transform-origin:50% 100%}
+.bomb{position:absolute;width:26px;height:26px;border-radius:50%;background:#2B2B2B;z-index:8;animation:pass 2s ease-in-out infinite}
+.bomb::after{content:"";position:absolute;left:18px;top:-8px;width:8px;height:8px;border-radius:50%;background:#FFB020;box-shadow:0 0 8px 3px #FFB020}
+@keyframes pass{0%,100%{transform:translate(0,0)}50%{transform:translate(90px,-30px)}}
+.board{position:absolute;left:47%;bottom:40px;width:170px;height:104px;background:#7B5232;border-radius:8px;padding:8px 10px;color:#FFF4E0;font-size:12px;line-height:1.6;z-index:5}
+.board b{font-family:'Jua',sans-serif;font-weight:400;font-size:15px;display:block;color:#FFE08A}
+.board::after{content:"";position:absolute;left:78px;bottom:-26px;width:8px;height:26px;background:#5C3B22}
+.station{position:absolute;right:6%;bottom:30px;width:260px;height:70px}
+.station .rail{position:absolute;left:-60px;right:-60px;bottom:0;height:6px;background:#6B5B4A}
+.train{position:absolute;bottom:6px;height:44px;width:160px;border-radius:12px 12px 4px 4px;background:#3BA55C;display:flex;gap:8px;padding:8px 12px;animation:train 9s ease-in-out infinite}
+.train b{width:24px;height:16px;border-radius:4px;background:#DFF6E6;display:block}
+@keyframes train{0%{transform:translateX(-300px)}40%,60%{transform:translateX(30px)}100%{transform:translateX(440px)}}
+.hanky{position:absolute;width:16px;height:12px;background:#fff;border:1px solid #ddd;z-index:9;animation:hanky .5s ease-in-out infinite alternate;transform-origin:bottom left}
+@keyframes hanky{from{transform:rotate(-20deg)}to{transform:rotate(20deg)}}
+.tree{position:absolute;width:58px;height:58px;border-radius:50%;background:#4FA54A}
+.tree::after{content:"";position:absolute;left:25px;top:50px;width:9px;height:24px;background:#7A4E2C}
+
+/* ── below the village ── */
+section{padding:80px 0 0}
+section > h2{font-size:42px;text-align:center}
+.sub{text-align:center;color:var(--soft);font-size:17px;margin:12px 0 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;margin-top:36px}
+.card{background:#fff;border-radius:20px;padding:20px 22px;border:2px solid #EFE6D2;scroll-margin-top:24px}
+.card .head{display:flex;align-items:center;gap:12px}
+.card .head .pet{position:static;width:44px;height:44px;flex:none}
+.card h3{font-size:22px}
+.card p{margin:8px 0 0;color:var(--soft);line-height:1.65;font-size:15px}
+.card .kw{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.card .kw span{background:#F4F1E6;border-radius:999px;padding:4px 10px;font-size:13px}
+.zoo{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:30px}
+.zoo .pet{position:relative;width:52px;height:52px}
+.gate{margin:80px 0 90px;background:#2F7A3D;color:#fff;border-radius:28px;padding:44px;display:flex;flex-wrap:wrap;gap:30px;align-items:center;justify-content:space-between}
+.gate h2{font-size:38px;text-align:left}
+.gate p{margin:10px 0 0;color:#DDF3E1;line-height:1.7}
+footer{text-align:center;color:var(--soft);font-size:13px;padding:24px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="logo"><span class="pet p-cat static s" aria-hidden="true"></span>팀 펫</div>
+    <nav aria-label="마을 안내"><a href="#t-talk">광장</a><a href="#t-smack">놀이터</a><a href="#t-fish">낚시터</a><a href="#t-games">게임</a><a href="#t-fx">효과</a><a href="#zoo">동물들</a></nav>
+  </div>
+</header>
+
+<div class="scroller">
+<div class="village" role="img" aria-label="펫 마을: UFO 가 펫을 태워 다른 방으로 옮기고, 하늘엔 폭죽, 대장간에서 낚싯대를 강화하고, 무대에서 춤추고, 연못에서 낚시하고, 광장에서 수다를 떨고, 놀이터에서 날려버리고, 눈밭에서 눈싸움을 하는 모습">
+  <div aria-hidden="true">
+    <div class="sun"></div>
+    <div class="cloud" style="top:70px;width:110px"></div>
+    <div class="cloud" style="top:330px;width:80px;animation-delay:-20s;animation-duration:60s"></div>
+    <div class="hill" style="left:-8%;bottom:470px;width:560px;height:200px"></div>
+    <div class="hill" style="left:32%;bottom:480px;width:640px;height:170px;background:#82C863"></div>
+    <div class="snowfield"></div>
+    <div class="ground"></div>
+    <div class="road"></div>
+    <div class="tree" style="left:20%;bottom:470px"></div>
+    <div class="tree" style="left:50%;bottom:470px;width:46px;height:46px"></div>
+    <div class="tree" style="left:68%;bottom:180px"></div>
+    <!-- 폭죽 -->
+    <div class="burst" style="left:14%;top:200px">
+      <i style="background:#F28482;--x:-40px;--y:-30px"></i><i style="background:#FFD666;--x:40px;--y:-30px"></i><i style="background:#7EE0C8;--x:0;--y:-48px"></i><i style="background:#9CD3FF;--x:-44px;--y:14px"></i><i style="background:#F28482;--x:44px;--y:14px"></i><i style="background:#FFD666;--x:0;--y:40px"></i>
+    </div>
+    <div class="burst" style="left:24%;top:120px">
+      <i style="background:#7EE0C8;--x:-34px;--y:-24px;animation-delay:.8s"></i><i style="background:#F28482;--x:34px;--y:-24px;animation-delay:.8s"></i><i style="background:#FFD666;--x:0;--y:-40px;animation-delay:.8s"></i><i style="background:#9CD3FF;--x:-36px;--y:16px;animation-delay:.8s"></i><i style="background:#7EE0C8;--x:36px;--y:16px;animation-delay:.8s"></i>
+    </div>
+    <div class="star" style="right:12%;top:120px"></div><div class="star" style="right:16%;top:60px"></div><div class="star" style="right:6%;top:200px"></div>
+    <!-- 대장간 -->
+    <div class="forge"><div class="roof"></div><div class="house"></div><div class="anvil"></div>
+      <i class="sparkle" style="left:150px;bottom:24px;--x:-16px;--y:-26px"></i><i class="sparkle" style="left:154px;bottom:24px;--x:14px;--y:-30px;animation-delay:.4s"></i><i class="sparkle" style="left:152px;bottom:24px;--x:2px;--y:-36px;animation-delay:.8s"></i></div>
+    <!-- 무대 -->
+    <div class="light" style="left:calc(25% - 10px)"></div><div class="light" style="left:calc(25% + 160px)"></div>
+    <div class="stage"></div>
+    <!-- 결투장 -->
+    <div class="duel"></div>
+    <!-- 연못·시상대 -->
+    <div class="pond"></div>
+    <div class="jump" style="left:9%;bottom:296px"></div>
+    <div class="podium" style="left:24%;height:56px;background:#F2C14E">1</div>
+    <div class="podium" style="left:calc(24% - 46px);height:38px;background:#D5DCE4">2</div>
+    <div class="podium" style="left:calc(24% + 46px);height:26px;background:#E1A36B">3</div>
+    <!-- 광장 -->
+    <div class="fountain"></div>
+    <!-- 그림방 -->
+    <div class="easel"><svg width="66" height="56" viewBox="0 0 66 56"><circle cx="33" cy="32" r="16" fill="none" stroke="#E5484D" stroke-width="3"/><path d="M20 22 L24 10 L30 19 M36 19 L42 10 L46 22" fill="none" stroke="#E5484D" stroke-width="3" stroke-linejoin="round"/></svg></div>
+    <!-- 놀이터 -->
+    <svg class="hoopsvg" style="position:absolute;left:calc(73% - 10px);bottom:250px;z-index:5" width="84" height="150" viewBox="0 0 84 150" aria-hidden="true">
+      <ellipse cx="66" cy="144" rx="16" ry="5" fill="#3F4650"/>
+      <rect x="62" y="30" width="8" height="114" rx="3" fill="#6B7280"/>
+      <rect x="46" y="36" width="20" height="5" fill="#6B7280"/>
+      <rect x="38" y="10" width="10" height="56" rx="2" fill="#FFFFFF" stroke="#9CA3AF" stroke-width="2"/>
+      <rect x="40" y="34" width="6" height="14" fill="none" stroke="#E5484D" stroke-width="1.6"/>
+      <path d="M6 54 L38 54" stroke="#F08A3C" stroke-width="5" stroke-linecap="round"/>
+      <path d="M8 56 L14 80 L30 80 L36 56 M14 56 L18 80 M22 56 L22 80 M30 56 L26 80 M10 64 L34 64 M12 72 L32 72" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round"/>
+    </svg>
+    <div style="position:absolute;left:calc(83% - 8px);bottom:252px;width:80px;height:10px;border-radius:3px;background:#8B6A4A"></div>
+    <div class="slide"></div>
+    <div class="tower"><b style="width:40px;background:#9CD3FF" class="drop"></b><b style="width:46px;background:#F28482"></b><b style="width:52px;background:#FFD666"></b><b style="width:58px;background:#7EE0C8"></b><b style="width:64px;background:#B8A9F5"></b></div>
+    <!-- 골프장 -->
+    <div class="green"></div><div class="flag"></div><div class="cup"></div>
+    <!-- 비 -->
+    <div class="raincloud"></div>
+    <i class="drop2" style="left:4.5%;bottom:120px"></i><i class="drop2" style="left:7%;bottom:130px;animation-delay:.3s"></i><i class="drop2" style="left:9.5%;bottom:124px;animation-delay:.5s"></i><i class="drop2" style="left:12%;bottom:128px;animation-delay:.15s"></i>
+
+    <!-- 기록 게시판 -->
+    <div class="board"><b>기록 도전 TOP 3</b>반응속도 · 우파루파 0.21초<br>1→25 · 고양이 8.4초<br>딱 10초 · 수달 ±0.03</div>
+    <!-- 지하철역 -->
+    <div class="station"><div class="rail"></div><div class="train"><b></b><b></b><b></b><b></b></div></div>
+  </div>
+
+  <div class="title">
+    <h1>우리 팀만의<br>작은 동물 마을</h1>
+    <p>바탕화면 아래 작은 마을에서 수다 떨고, 날려버리고, 낚시하고, 강화하고, 눈싸움하고, 지하철 레이스까지. 일하다 잠깐 같이 노는 팀 메신저예요.</p>
+    <div class="cta">
+      <a class="btn go" href="https://github.com/kimdonghuyn/team-pet/releases/latest">마을 입주하기 · Windows</a>
+      <a class="btn mac" href="https://github.com/kimdonghuyn/team-pet/releases/latest">macOS</a>
+    </div>
+  </div>
+
+  <!-- sky -->
+  <div class="ufo" aria-hidden="true"><div class="beam"></div><div class="disc"></div><div class="dome"></div><span class="pet p-ghost s"></span></div>
+  <div class="tag" style="left:16%;top:270px;color:#B4536D">/폭죽</div>
+  <div class="rocket"><span class="pet p-hamster s" style="position:static;display:block"></span></div>
+  <div class="tag" style="right:4%;top:240px;color:#6B4FA3">우주까지!</div>
+
+  <!-- back row -->
+  <a class="sign" href="#t-fish" style="left:4%;bottom:500px"><span>대장간</span><i></i></a>
+  <div class="pet p-bear" style="left:calc(3% + 130px);bottom:420px;background-image:url(assets/pets/bear.png)"></div>
+  <div class="tag" style="left:calc(3% + 128px);bottom:484px;color:#C2410C">강화 성공!</div>
+  <a class="sign" href="#t-fx" style="left:29%;bottom:560px"><span>무대</span><i></i></a>
+  <div class="pet p-rabbit dance" style="left:26%;bottom:428px"></div>
+  <div class="pet p-chick dance" style="left:calc(26% + 70px);bottom:428px;background-image:url(assets/pets/chick.png);animation-delay:.15s"></div>
+  <div class="pet p-panda dance" style="left:calc(26% + 140px);bottom:428px;animation-delay:.3s"></div>
+  <div class="tag" style="left:calc(26% + 40px);bottom:530px;color:#6B4FA3">/춤 PERFECT!</div>
+  <a class="sign" href="#t-games" style="left:57%;bottom:520px"><span>결투장</span><i></i></a>
+  <div class="pet p-fox" style="left:56%;bottom:426px"></div>
+  <div class="pet p-dog flip" style="left:calc(56% + 100px);bottom:426px"></div>
+  <div class="tag" style="left:calc(56% + 66px);bottom:470px;color:#DC2626">!</div>
+  <a class="sign" href="#t-smack" style="right:6%;bottom:620px"><span>눈밭</span><i></i></a>
+  <div class="snowman" style="right:20%;bottom:430px"></div>
+  <div class="pet p-penguin hop" style="right:7%;bottom:440px"></div>
+  <div class="ball" style="right:12%;bottom:500px"></div>
+  <div class="tag" style="right:15%;bottom:540px;color:#3E8FC2">명중!</div>
+
+  <!-- middle row -->
+  <a class="sign" href="#t-fish" style="left:9%;bottom:360px"><span>낚시터</span><i></i></a>
+  <div class="pet p-otter" style="left:4%;bottom:300px"></div>
+  <div class="rod" aria-hidden="true" style="left:calc(4% + 6px);bottom:296px;width:100px;height:76px;background-image:url(assets/rods/rod-12.png)"></div>
+  <div class="pet p-duck s hop" style="left:16%;bottom:292px"></div>
+  <div class="pet p-seal s" style="left:calc(24% + 2px);bottom:306px"></div>
+  <div class="pet p-axolotl s" style="left:calc(24% - 44px);bottom:288px"></div>
+  <div class="pet p-sprout s" style="left:calc(24% + 48px);bottom:276px"></div>
+  <div class="tag" style="left:calc(24% - 30px);bottom:352px;color:#B7791F">낚시대회 1등!</div>
+  <a class="sign" href="#t-talk" style="left:41%;bottom:372px"><span>광장</span><i></i></a>
+  <div class="bub" style="left:31%;bottom:356px">오늘 회의 몇 시죠?</div>
+  <div class="pet p-cat talk" style="left:34%;bottom:286px"></div>
+  <div class="bub called" style="left:43%;bottom:350px">@토끼 3시요!</div>
+  <div class="pet p-unicorn talk" style="left:46%;bottom:288px"></div>
+  <div class="pet p-capy hop" style="left:39%;bottom:236px"></div>
+  <div class="bub note" style="left:43%;bottom:236px">쪽지: 커피 사 갈게요</div>
+  <a class="sign" href="#t-games" style="left:55%;bottom:362px"><span>그림방</span><i></i></a>
+  <div class="pet p-mouse s" style="left:59%;bottom:262px;background-image:url(assets/pets/mouse.png)"></div>
+  <div class="bub" style="left:58%;bottom:310px">고양이!</div>
+  <a class="sign" href="#t-smack" style="left:71%;bottom:396px"><span>놀이터</span><i></i></a>
+  <div class="pet p-frog arc" style="left:66%;bottom:262px"></div>
+  <div class="tag" style="left:calc(73% - 62px);bottom:330px;color:#C2410C">골!</div>
+  <div class="tag" style="left:calc(83% - 10px);bottom:390px;color:#6B4FA3;font-size:17px">높이 쌓기</div>
+  <div class="pet p-monkey s" style="left:calc(83% + 76px);bottom:252px;background-image:url(assets/pets/monkey.png)"></div>
+  <a class="sign" href="#t-smack" style="right:4%;bottom:350px"><span>골프장</span><i></i></a>
+  <div class="pet p-sheep s roll" style="right:calc(2% + 40px);bottom:262px;background-image:url(assets/pets/sheep.png)"></div>
+  <div class="tag" style="right:3%;bottom:306px;color:#2F7A3D">홀인원!</div>
+
+  <!-- front row -->
+  <a class="sign" href="#t-fx" style="left:16%;bottom:170px"><span>/비</span><i></i></a>
+  <div class="umb" data-kind="hedgehog" style="left:calc(4.3% - 18px);bottom:64px"></div>
+  <div class="umb" data-kind="owl" style="left:calc(10.3% - 18px);bottom:64px"></div>
+  <div class="pet p-hedgehog" style="left:4.3%;bottom:44px;background-image:url(assets/pets/hedgehog.png)"></div>
+  <div class="pet p-owl" style="left:10.3%;bottom:44px;background-image:url(assets/pets/owl.png)"></div>
+  <a class="sign" href="#t-games" style="left:30%;bottom:150px"><span>폭탄 돌리기</span><i></i></a>
+  <div class="pet p-pig" style="left:24%;bottom:30px;background-image:url(assets/pets/pig.png)"></div>
+  <div class="pet p-tiger" style="left:calc(24% + 110px);bottom:30px;background-image:url(assets/pets/tiger.png)"></div>
+  <div class="bomb" style="left:calc(24% + 40px);bottom:90px"></div>
+  <a class="sign" href="#t-games" style="right:15%;bottom:120px"><span>팀펫역</span><i></i></a>
+  <div class="pet p-horse s" style="right:30%;bottom:28px;background-image:url(assets/pets/horse.png)"></div>
+  <div class="bub" style="right:24%;bottom:84px">다음 역: 강남!</div>
+  <div class="pet p-lemon s" style="right:2%;bottom:120px;background-image:url(assets/pets/lemonbun.png)"></div>
+  <div class="hanky" style="right:calc(2% + 30px);bottom:156px"></div>
+  <div class="bub" style="right:1%;bottom:168px">내일 봐요!</div>
+</div>
+</div>
+
+<main class="wrap">
+  <section class="tour" id="tour">
+    <h2>마을 구경</h2>
+    <p class="sub">스크롤을 내리면서 하나씩 구경해 보세요. 장면은 실제 펫 화면 그대로예요.</p>
+
+    <div class="step" id="t-talk" data-name="광장">
+      <div class="say">
+        <div class="no">01 · 광장</div>
+        <h3>말하면 내 동물 위에<br>말풍선이 떠요</h3>
+        <p>작업표시줄 위 내 동물을 누르면 작은 대화창이 열려요. 같은 방 사람마다 동물이 한 마리씩 앉아 있고, 누가 말하면 그 동물 위에 말풍선이 떠요. 일하면서 슬쩍 보고 답하면 돼요.</p>
+        <div class="kw"><span>대화창 크기 · 진하기</span><span>사진 붙여 넣기</span><span>말풍선 / 빨간 점만</span></div>
+      </div>
+      <div class="screen" role="img" aria-label="대화창이 열려 있고 친구 수달 위에 말풍선이 뜬 바탕화면">
+        <div class="wall-win" aria-hidden="true"><i style="width:80%"></i><i style="width:60%"></i><i style="width:70%"></i></div>
+        <div class="dock">
+          <div class="uchat">
+            <div class="box">
+              <div class="lines">
+                <div class="uline pop" style="--d:0s"><b>카피바라</b>오늘 회의 몇 시죠?</div>
+                <div class="uline mine pop" style="--d:1.2s"><b>나</b>3시요!</div>
+                <div class="uline pop" style="--d:2.4s"><b>토끼</b>저 오늘 케이크 가져왔어요</div>
+                <div class="uline pop" style="--d:3.6s"><b>수달</b>점심 뭐 먹을까요?</div>
+              </div>
+              <div class="uin">놀이터 방에 말하기 (Enter)</div>
+            </div>
+            <div class="utabs"><div class="utab on">놀이터 4</div><div class="utab">✉️ 수달</div></div>
+          </div>
+          <div class="row">
+            <div class="slot"><div class="bubw loop-fade" style="left:-30px;transform:none"><div class="ubub"><b>수달</b>점심 뭐 먹을까요?</div></div><div class="img" style="background-image:url(assets/pets/otter.png)"></div><div class="nm">수달</div></div>
+            <div class="slot"><div class="img" style="background-image:url(assets/pets/capybara.png);animation-delay:.3s"></div><div class="nm">카피바라</div></div>
+            <div class="slot"><div class="img" style="background-image:url(assets/pets/rabbit.png);animation-delay:.6s"></div><div class="nm">토끼</div></div>
+            <div class="slot me"><div class="img" style="background-image:url(assets/pets/cat.png)"></div><div class="nm">나</div></div>
+          </div>
+        </div>
+        <div class="taskbar" aria-hidden="true"><b></b><b></b><b></b><span>오후 12:10</span></div>
+      </div>
+    </div>
+
+    <div class="step" id="t-call" data-name="@부르기 · 쪽지">
+      <div class="say">
+        <div class="no">02 · @부르기 · 쪽지</div>
+        <h3>이름을 부르면<br>펄쩍, 쪽지는 나만</h3>
+        <p><b>@이름</b> 으로 부르면 그 사람 펫이 펄쩍 뛰고 노란 말풍선이 떠요. 한 사람에게만 할 말은 쪽지로 — 보라색 말풍선으로 와서, 누르면 바로 답장해요.</p>
+        <div class="kw"><span>@모두</span><span>쪽지 · /r 답장</span><span>찌르기</span><span>윈도우 알림</span></div>
+      </div>
+      <div class="screen" role="img" aria-label="노란 말풍선으로 이름이 불리고 보라색 쪽지 말풍선이 뜬 장면">
+        <div class="wall-win" aria-hidden="true"><i style="width:70%"></i><i style="width:76%"></i><i style="width:52%"></i></div>
+        <div class="dock">
+          <div class="row">
+            <div class="slot"><div class="bubw loop-fade" style="animation-delay:1.5s"><div class="ubub note"><b>수달 님의 쪽지</b>✉️ 커피 사 갈게요 ☕</div></div><div class="img" style="background-image:url(assets/pets/otter.png)"></div><div class="nm">수달</div></div>
+            <div class="slot"><div class="img" style="background-image:url(assets/pets/capybara.png)"></div><div class="nm">카피바라</div></div>
+            <div class="slot me"><div class="bubw loop-fade"><div class="ubub called"><b>카피바라</b><span class="utag">@고양이</span> 리뷰 부탁해요!</div></div><div class="img hop" style="background-image:url(assets/pets/cat.png);animation:pet-talk .4s steps(1) infinite,pet-hop 1.2s ease-in-out infinite"></div><div class="nm">나</div></div>
+          </div>
+        </div>
+        <div class="taskbar" aria-hidden="true"><b></b><b></b><b></b><span>오후 2:41</span></div>
+      </div>
+    </div>
+
+    <div class="step" id="t-smack" data-name="날려버리기">
+      <div class="say">
+        <div class="no">03 · 놀이터</div>
+        <h3>친구를 골대에<br>날려 넣어요</h3>
+        <p>친구 동물을 오른쪽 클릭 → <b>🦶 날려버리기</b>. 화살표가 흔들릴 때 방향을, 막대가 차오를 때 힘을 클릭하면 날아가요. 농구 골대에 쏙, 링이나 백보드를 맞고 튕겨 들어가기도 해요.</p>
+        <div class="kw"><span>날아차기 · 뿅망치</span><span>링 · 백보드 맞고 골</span><span>날려버리기 안 받기</span></div>
+      </div>
+      <div class="screen" role="img" aria-label="개구리를 오른쪽 클릭한 메뉴에서 날려버리기를 고르고, 방향을 잡아 농구 골대로 날려 넣는 장면">
+        <div class="wall-win" aria-hidden="true"><i style="width:80%"></i><i style="width:58%"></i><i style="width:66%"></i></div>
+        <svg class="aim-in" style="position:absolute;right:338px;bottom:40px;z-index:9" width="84" height="150" viewBox="0 0 84 150" aria-hidden="true">
+          <ellipse cx="66" cy="144" rx="16" ry="5" fill="#1F2533"/><rect x="62" y="30" width="8" height="114" rx="3" fill="#8A93A8"/><rect x="46" y="36" width="20" height="5" fill="#8A93A8"/>
+          <rect x="38" y="10" width="10" height="56" rx="2" fill="#FFFFFF" stroke="#C9CEDA" stroke-width="2"/><rect x="40" y="34" width="6" height="14" fill="none" stroke="#E5484D" stroke-width="1.6"/>
+          <path d="M6 54 L38 54" stroke="#F08A3C" stroke-width="5" stroke-linecap="round"/>
+          <path d="M8 56 L14 80 L30 80 L36 56 M14 56 L18 80 M22 56 L22 80 M30 56 L26 80 M10 64 L34 64 M12 72 L32 72" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
+        <div class="fxw aim-in" style="right:330px;bottom:200px;color:#FF9F1C;font-size:14px">골대에 쏙!</div>
+        <div class="dots aim-in" style="right:200px;bottom:100px"></div>
+        <div class="fxw aim-in" style="right:200px;bottom:220px;color:#FFB347;font-size:15px">① 방향! 클릭</div>
+        <div class="power aim-in" style="right:20px;bottom:120px"><i></i></div>
+        <div class="fxw goal-pop" style="right:340px;bottom:210px;color:#FFD700;font-size:34px">골!</div>
+        <div class="umenu menu-in" style="right:150px;bottom:110px">
+          <div class="mh">개구리 님</div>
+          <div class="mi"><span></span><span>✉️ 쪽지 보내기</span><span></span></div>
+          <div class="mi"><span></span><span>⚔️ 1:1 대결</span><span class="ar">›</span></div>
+          <div class="mi open"><span></span><span>🦶 날려버리기</span><span class="ar">›</span></div>
+          <div class="mi"><span></span><span>❄️ 눈덩이 던지기</span><span></span></div>
+        </div>
+        <div class="umenu menu-in" style="right:-30px;bottom:150px">
+          <div class="mi"><span></span><span>🦶 날아차기</span><span></span></div>
+          <div class="mi"><span></span><span>🔨 뿅망치</span><span></span></div>
+        </div>
+        <div class="dock">
+          <div class="row">
+            <div class="slot"><div class="img flyhoop" style="background-image:url(assets/pets/frog.png)"></div><div class="nm">개구리</div></div>
+            <div class="slot"><div class="img" style="background-image:url(assets/pets/dog.png);animation-delay:.4s"></div><div class="nm">강아지</div></div>
+            <div class="slot"><div class="img" style="background-image:url(assets/pets/duck.png);animation-delay:.2s"></div><div class="nm">오리</div></div>
+            <div class="slot me"><div class="img" style="background-image:url(assets/pets/cat.png)"></div><div class="nm">나</div></div>
+          </div>
+        </div>
+        <div class="taskbar" aria-hidden="true"><b></b><b></b><b></b><span>오후 3:15</span></div>
+      </div>
+    </div>
+
+    <div class="step" id="t-golf" data-name="골프 · 우주">
+      <div class="say">
+        <div class="no">04 · 골프장 · 우주</div>
+        <h3>골대 대신 홀컵이 나오면<br>굴려서 홀인원</h3>
+        <p>날려버릴 때마다 농구 골대나 골프 홀컵이 나와요. 통통 튀다가 데굴데굴 굴러 들어가면 홀인원. 힘을 끝까지 꽉 채우면… 우주까지 날아가요.</p>
+        <div class="kw"><span>홀인원</span><span>굴러서 홀인</span><span>홀컵 앞에서 멈춤</span><span>우주 여행</span></div>
+      </div>
+      <div class="screen" role="img" aria-label="양이 데굴데굴 굴러 골프 홀컵에 들어가고 햄스터는 우주로 날아가는 장면">
+        <div class="wall-win" aria-hidden="true"><i style="width:60%"></i><i style="width:80%"></i></div>
+        <div class="green-hole" aria-hidden="true" style="left:90px;width:200px"></div>
+        <div aria-hidden="true" style="position:absolute;left:184px;bottom:58px;width:3px;height:74px;background:#fff;z-index:5"></div>
+        <div aria-hidden="true" style="position:absolute;left:187px;bottom:116px;width:26px;height:16px;background:#F28482;clip-path:polygon(0 0,100% 50%,0 100%);z-index:5"></div>
+        <div aria-hidden="true" style="position:absolute;left:176px;bottom:56px;width:22px;height:7px;border-radius:50%;background:#10301F;z-index:5"></div>
+        <div class="slot" style="position:absolute;left:162px;bottom:58px;z-index:6"><div class="img rollin" style="background-image:url(assets/pets/sheep.png)"></div></div>
+        <div class="fxw" style="left:130px;bottom:150px;color:#FFD700;font-size:26px">홀인원!</div>
+        <div class="fxw" style="right:140px;top:40px;color:#C4B5FD;font-size:22px">우주까지! 🚀</div>
+        <div aria-hidden="true" style="position:absolute;right:120px;top:90px;width:4px;height:4px;border-radius:50%;background:#FFD666"></div>
+        <div aria-hidden="true" style="position:absolute;right:230px;top:60px;width:3px;height:3px;border-radius:50%;background:#fff"></div>
+        <div class="dock">
+          <div class="row">
+            <div class="slot"><div class="img tospace" style="background-image:url(assets/pets/hamster.png)"></div><div class="nm">햄스터</div></div>
+            <div class="slot"><div class="img" style="background-image:url(assets/pets/fox.png)"></div><div class="nm">여우</div></div>
+            <div class="slot me"><div class="img" style="background-image:url(assets/pets/cat.png)"></div><div class="nm">나</div></div>
+          </div>
+        </div>
+        <div class="taskbar" aria-hidden="true"><b></b><b></b><b></b><span>오후 3:18</span></div>
+      </div>
+    </div>
+
+    <div class="step" id="t-snow" data-name="눈덩이">
+      <div class="say">
+        <div class="no">05 · 눈밭</div>
+        <h3>맞으면 잠깐<br>눈사람이 돼요</h3>
+        <p>친구 동물을 오른쪽 클릭 → <b>❄️ 눈덩이 던지기</b>. 눈송이가 막대 위를 오갈 때 파란 칸에서 클릭하면 명중! 맞은 친구는 잠깐 그 동물 모양 눈사람이 돼요. 날아오는 게 보이면 내 펫을 눌러 휙 피할 수 있어요.</p>
+        <div class="kw"><span>타이밍 막대</span><span>피하기</span><span>동물마다 다른 눈사람</span><span>/눈사람 다 같이</span></div>
+      </div>
+      <div class="screen" role="img" aria-label="눈송이 타이밍 막대 위에서 던진 눈덩이가 펭귄에게 맞아 펭귄이 눈사람이 되는 장면" style="background:#33415E">
+        <div class="wall-win" aria-hidden="true"><i style="width:74%"></i><i style="width:56%"></i></div>
+        <div class="fxw" style="right:26px;bottom:166px;color:#9CD3FF;font-size:12px">파란 칸에서 클릭!</div>
+        <div class="snowbar" style="right:20px;bottom:142px"><div class="zone"></div><div class="flake">❄️</div></div>
+        <div aria-hidden="true" class="ballfly" style="position:absolute;right:40px;bottom:110px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 0 0 2px #C9D8EE;z-index:22"></div>
+        <div class="becomes-snow" aria-hidden="true" style="position:absolute;right:226px;bottom:52px;width:40px;height:66px;background:url(assets/snowmen/penguin.png) no-repeat center/contain;image-rendering:pixelated;z-index:12"></div>
+        <div class="fxw becomes-snow" style="right:216px;bottom:140px;color:#9CD3FF;font-size:22px">명중!</div>
+        <div class="dock">
+          <div class="row">
+            <div class="slot"><div class="img hide-when-snow" style="background-image:url(assets/pets/penguin.png)"></div><div class="nm">펭귄</div></div>
+            <div class="slot"><div class="img" style="background-image:url(assets/pets/panda.png)"></div><div class="nm">판다</div></div>
+            <div class="slot"><div class="img" style="background-image:url(assets/pets/fox.png)"></div><div class="nm">여우</div></div>
+            <div class="slot me"><div class="img" style="background-image:url(assets/pets/cat.png)"></div><div class="nm">나</div></div>
+          </div>
+        </div>
+        <div class="taskbar" aria-hidden="true"><b></b><b></b><b></b><span>오후 4:02</span></div>
+      </div>
+    </div>
+
+    <div class="step" id="t-fish" data-name="낚시 · 도감">
+      <div class="say">
+        <div class="no">06 · 낚시터</div>
+        <h3>찌가 쑥 들어가면<br>펫을 클릭!</h3>
+        <p>대화창에 <b>/낚시</b> 하면 내 펫이 낚싯대를 드리워요. 찌가 쑥 들어갈 때 펫을 누르고, 움직이는 칸에 맞춰 한 번 더 누르면 낚여요. 물고기 264종 도감을 채우고, 도감에서 자랑도 해요.</p>
+        <div class="kw"><span>도감 264종</span><span>전설 물고기</span><span>층 최대어 기록</span><span>자랑하기 무대</span></div>
+      </div>
+      <div class="screen" role="img" aria-label="수달이 낚싯대를 드리우고 물고기를 낚아 올리며 도감 창이 열린 장면" style="background:#2C3E5A">
+        <div class="wall-win" aria-hidden="true"><i style="width:72%"></i></div>
+        <div class="fishcard" style="right:40px;bottom:120px"><div class="f"></div><div style="font-weight:800;font-size:12px">무지개송어</div><div style="color:#F2C14E;font-size:11px">54cm · 희귀</div></div>
+        <div class="dock">
+          <div class="upanel" style="border-color:#5dadec">
+            <div class="t" style="color:#9cd3ff">📖 물고기 도감 · 놀이터 방</div>
+            <div style="font-size:12px;margin-top:4px">37 / 264종 · 전설 2 · 최대어 82cm</div>
+            <div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:6px" aria-hidden="true">
+              <i style="width:24px;height:16px;border-radius:5px;background:#FFB36B"></i><i style="width:24px;height:16px;border-radius:5px;background:#7EC8E3"></i><i style="width:24px;height:16px;border-radius:5px;background:#F28482"></i><i style="width:24px;height:16px;border-radius:5px;background:#F2C14E"></i><i style="width:24px;height:16px;border-radius:5px;background:#9CD3FF"></i><i style="width:24px;height:16px;border-radius:5px;background:#B8A9F5"></i><i style="width:24px;height:16px;border-radius:5px;background:#2a2640"></i><i style="width:24px;height:16px;border-radius:5px;background:#2a2640"></i>
+              <i style="width:24px;height:16px;border-radius:5px;background:#7EE0C8"></i><i style="width:24px;height:16px;border-radius:5px;background:#2a2640"></i><i style="width:24px;height:16px;border-radius:5px;background:#FFD666"></i><i style="width:24px;height:16px;border-radius:5px;background:#2a2640"></i><i style="width:24px;height:16px;border-radius:5px;background:#E07A5F"></i><i style="width:24px;height:16px;border-radius:5px;background:#2a2640"></i><i style="width:24px;height:16px;border-radius:5px;background:#9CD3FF"></i><i style="width:24px;height:16px;border-radius:5px;background:#2a2640"></i>
+            </div>
+            <div class="ubtns"><span class="ubtn hot">🏆 자랑하기</span><span class="ubtn">🎣 낚싯대 자랑</span><span class="ubtn">⚒️ 강화</span><span class="ubtn">닫기</span></div>
+          </div>
+          <div class="row" style="position:relative">
+            <div class="slot"><div class="img" style="background-image:url(assets/pets/duck.png)"></div><div class="nm">오리</div></div>
+            <div class="slot me" style="position:relative"><div class="rodanim" style="left:-70px;bottom:24px;background-image:url(assets/rods/rod-08.png)"></div><div class="img" style="background-image:url(assets/pets/otter.png)"></div><div class="nm">나</div></div>
+          </div>
+        </div>
+        <div class="bobber" style="right:120px;bottom:40px"></div>
+        <div class="taskbar" aria-hidden="true"><b></b><b></b><b></b><span>오후 12:31</span></div>
+      </div>
+    </div>
+
+    <div class="step" id="t-forge" data-name="강화">
+      <div class="say">
+        <div class="no">07 · 대장간</div>
+        <h3>도감을 채우면<br>낚싯대 강화</h3>
+        <p><b>/강화</b> 로 대장간을 열어요. 낚싯대는 초보 낚싯대부터 흑룡의 숨결까지 15단계. 성공하면 빛나고, 실패하면 그대로, 운이 나쁘면 깨져요. 보호 부적이 막아 주기도 하고, 실패할수록 장인의 기운이 차올라요.</p>
+        <div class="kw"><span>15단계</span><span>성공 · 실패 · 파괴</span><span>보호 부적</span><span>장인의 기운</span></div>
+      </div>
+      <div class="screen" role="img" aria-label="낚싯대 강화 창에서 7강 빙결에서 8강 불꽃 단조로 강화에 성공하는 장면" style="background:#3A2F4A">
+        <div class="dock">
+          <div class="upanel forge-glow" style="border-color:#E9A23B">
+            <div class="t" style="color:#FFD166">⚒️ 낚싯대 강화 · 놀이터 방</div>
+            <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px">
+              <span class="rodpic" aria-hidden="true" style="background-image:url(assets/rods/rod-07.png)"></span>
+              <span style="color:#FFD166;font-size:18px">→</span>
+              <span class="rodpic" aria-hidden="true" style="background-image:url(assets/rods/rod-08.png)"></span>
+            </div>
+            <div style="font-size:13px;font-weight:700;margin-top:6px">지금 7강 ❄️ 빙결</div>
+            <div style="font-size:12px;color:#cfc9e6;margin-top:2px">강화 포인트 12 · 🛡 보호 부적 1/3 · 도감 37종</div>
+            <div class="gauge"><i></i><span>장인의 기운 42%</span></div>
+            <div style="font-size:12px;color:#cfc9e6;margin-top:6px">다음: 8강 🔥 불꽃 단조<br>성공 60% · 실패 30% · 깨짐 10%</div>
+            <div class="ubtns"><span class="ubtn hot">⚒️ 강화하기</span><span class="ubtn">📖 도감</span><span class="ubtn">닫기</span></div>
+          </div>
+          <div class="row">
+            <div class="slot me"><div class="img" style="background-image:url(assets/pets/bear.png)"></div><div class="nm">나</div></div>
+          </div>
+        </div>
+        <div class="fxw forge-ok" style="right:300px;bottom:250px;color:#FFD666;font-size:26px">✨ 강화 성공!</div>
+        <div class="fxw forge-ok" style="right:310px;bottom:220px;color:#fff;font-size:14px">7강 → 8강 🔥 불꽃 단조</div>
+        <div class="taskbar" aria-hidden="true"><b></b><b></b><b></b><span>오후 1:05</span></div>
+      </div>
+    </div>
+
+    <div class="step" id="t-contest" data-name="낚시대회">
+      <div class="say">
+        <div class="no">08 · 시상대</div>
+        <h3>점심엔 다 같이<br>낚시대회</h3>
+        <p><b>/낚시대회</b> 로 대회를 열면 방 모두에게 알림이 가요. 30초 안에 참가하고, 2분 동안 다섯 번씩. 가장 귀한 물고기를 낚은 사람이 1등 — 1·2·3등은 시상대에 올라 물고기를 들어 보여요.</p>
+        <div class="kw"><span>2분 · 5번</span><span>실시간 순위</span><span>금 · 은 · 동 시상대</span></div>
+      </div>
+      <div class="screen" role="img" aria-label="낚시대회 순위 창과 1·2·3등 동물이 시상대에 오른 장면" style="background:#2E3A5C">
+        <div aria-hidden="true" class="step-p" style="left:110px;height:62px;background:#F2C14E">1</div>
+        <div aria-hidden="true" class="step-p" style="left:52px;height:42px;background:#D5DCE4">2</div>
+        <div aria-hidden="true" class="step-p" style="left:168px;height:28px;background:#E1A36B">3</div>
+        <div class="slot" style="position:absolute;left:114px;bottom:96px"><div class="img" style="background-image:url(assets/pets/otter.png)"></div></div>
+        <div class="slot" style="position:absolute;left:56px;bottom:76px"><div class="img" style="background-image:url(assets/pets/duck.png)"></div></div>
+        <div class="slot" style="position:absolute;left:172px;bottom:62px"><div class="img" style="background-image:url(assets/pets/seal.png)"></div></div>
+        <div class="fxw" style="left:96px;bottom:168px;color:#FFD700;font-size:16px">🥇 황금잉어 82cm</div>
+        <div class="dock">
+          <div class="upanel" style="border-color:#2a9d8f">
+            <div class="t" style="color:#7ee0c8">🏁 낚시대회 · 남은 시간 1:24</div>
+            <div class="urow"><span>🥇 수달</span><span>✨ 황금잉어 82cm</span></div>
+            <div class="urow me"><span>🥈 나</span><span>무지개송어 54cm</span></div>
+            <div class="urow"><span>🥉 물범</span><span>참돔 41cm</span></div>
+            <div class="urow"><span>4 오리</span><span>고등어 30cm</span></div>
+            <div class="tx" style="font-size:12px;color:#cfc9e6">남은 기회 ●●○○○</div>
+          </div>
+          <div class="row">
+            <div class="slot me"><div class="img" style="background-image:url(assets/pets/cat.png)"></div><div class="nm">나</div></div>
+          </div>
+        </div>
+        <div class="taskbar" aria-hidden="true"><b></b><b></b><b></b><span>오후 12:45</span></div>
+      </div>
+    </div>
+
+    <div class="step" id="t-games" data-name="같이 하는 게임">
+      <div class="say">
+        <div class="no">09 · 그림방 · 놀이터</div>
+        <h3>같이 하는 게임이<br>이만큼</h3>
+        <p>내 펫 오른쪽 클릭 → <b>🎮 게임</b>. 한 명이 그리고 다 같이 맞히는 캐치마인드(가끔 2점짜리 어려운 문제), 이어 그리기, 블록을 쌓아 올리는 높이 쌓기, 역 이름을 타자로 치는 지하철 레이스까지.</p>
+        <div class="kw"><span>캐치마인드</span><span>이어 그리기 3문제</span><span>높이 쌓기</span><span>지하철 레이스</span><span>폭탄 돌리기</span><span>끝말잇기</span><span>라이어 게임</span></div>
+      </div>
+      <div class="screen" role="img" aria-label="캐치마인드 창에 그려진 고양이 그림과 정답, 옆에 높이 쌓기 창" style="background:#2F3B57;height:460px">
+        <div class="upanel" style="position:absolute;left:16px;bottom:44px;border-color:#7c6cf0;z-index:9">
+          <div class="t" style="color:#cfc7ff">🏗 높이 쌓기 · 내 차례!</div>
+          <div class="tower-box" style="height:170px">
+            <div class="blk mv" style="left:80px;top:20px;width:60px;background:#FF9F5A"></div>
+            <div class="blk" style="left:74px;bottom:0;width:72px;background:#B8A9F5"></div>
+            <div class="blk" style="left:78px;bottom:18px;width:66px;background:#7EE0C8"></div>
+            <div class="blk" style="left:82px;bottom:36px;width:60px;background:#FFD666"></div>
+            <div class="blk" style="left:84px;bottom:54px;width:56px;background:#F28482"></div>
+          </div>
+          <div class="tx" style="font-size:12px">4층 · 이 방 최고 기록 11층</div>
+        </div>
+        <div class="dock">
+          <div class="upanel" style="border-color:#2a9d8f">
+            <div class="t" style="color:#7ee0c8">🖍 캐치마인드 · 3/10문제 · 🔥 어려운 문제 (2점)</div>
+            <div class="sheet"><svg width="220" height="150" viewBox="0 0 220 150" aria-hidden="true"><circle cx="110" cy="84" r="40" fill="none" stroke="#E5484D" stroke-width="4"/><path d="M80 58 L86 30 L100 50 M120 50 L134 30 L140 58" fill="none" stroke="#E5484D" stroke-width="4" stroke-linejoin="round"/><circle cx="96" cy="80" r="3" fill="#2a2340"/><circle cx="124" cy="80" r="3" fill="#2a2340"/></svg></div>
+            <div class="tx" style="font-size:12px">토끼: 여우? · 수달: 고양이!</div>
+            <div class="tx" style="color:#9BF2B8;font-weight:700">✅ 수달 님 정답! (🔥 +2점)</div>
+          </div>
+          <div class="row">
+            <div class="slot"><div class="img" style="background-image:url(assets/pets/otter.png)"></div><div class="nm">수달</div></div>
+            <div class="slot"><div class="img" style="background-image:url(assets/pets/rabbit.png)"></div><div class="nm">토끼</div></div>
+            <div class="slot me"><div class="img" style="background-image:url(assets/pets/cat.png)"></div><div class="nm">나</div></div>
+          </div>
+        </div>
+        <div class="taskbar" aria-hidden="true"><b></b><b></b><b></b><span>오후 5:20</span></div>
+      </div>
+    </div>
+
+    <div class="step" id="t-duel" data-name="결투 · 기록">
+      <div class="say">
+        <div class="no">10 · 결투장 · 게시판</div>
+        <h3>둘이서 붙거나<br>혼자 기록 도전</h3>
+        <p>친구에게 <b>⚔️ 1:1 대결</b>을 걸면 결투 · 러시안 룰렛 · 가위바위보. 혼자 할 땐 반응속도 · 1→25 · 딱 10초로 기록을 세워 방 TOP 3 에 이름을 남겨요.</p>
+        <div class="kw"><span>결투</span><span>러시안 룰렛</span><span>가위바위보</span><span>반응속도</span><span>1→25</span><span>딱 10초</span></div>
+      </div>
+      <div class="screen" role="img" aria-label="결투 창에서 지금! 신호가 뜨고, 기록 도전 TOP 3 창이 함께 열린 장면">
+        <div class="upanel" style="position:absolute;left:16px;bottom:44px;border-color:#e9b949;z-index:9">
+          <div class="t" style="color:#ffd166">🏆 반응속도 · 놀이터 방 TOP 3</div>
+          <div class="urow"><span>🥇 우파루파</span><span>0.198초</span></div>
+          <div class="urow me"><span>🥈 나</span><span>0.231초</span></div>
+          <div class="urow"><span>🥉 수달</span><span>0.264초</span></div>
+          <div style="height:70px;margin-top:6px;border-radius:8px;background:#2ECC71;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700">지금!</div>
+        </div>
+        <div class="dock">
+          <div class="upanel" style="border-color:#f59e0b">
+            <div class="t" style="color:#fcd34d">⚔️ 1:1 대결 · 🤠 결투</div>
+            <div style="display:flex;justify-content:center;gap:40px;margin-top:8px" aria-hidden="true">
+              <span class="img" style="width:44px;height:44px;background:url(assets/pets/fox.png) no-repeat 0 0/400% 100%;image-rendering:pixelated;display:block"></span>
+              <span class="img" style="width:44px;height:44px;background:url(assets/pets/cat.png) no-repeat 0 0/400% 100%;image-rendering:pixelated;display:block;transform:scaleX(-1)"></span>
+            </div>
+            <div class="tx" style="font-size:16px;color:#FF6B6B;font-weight:800" >지금! 쏴요!</div>
+            <div class="ubtns"><span class="ubtn hot">🔫 쏘기</span></div>
+          </div>
+          <div class="row">
+            <div class="slot"><div class="img" style="background-image:url(assets/pets/fox.png)"></div><div class="nm">여우</div></div>
+            <div class="slot me"><div class="img" style="background-image:url(assets/pets/cat.png)"></div><div class="nm">나</div></div>
+          </div>
+        </div>
+        <div class="taskbar" aria-hidden="true"><b></b><b></b><b></b><span>오후 3:50</span></div>
+      </div>
+    </div>
+
+    <div class="step" id="t-fx" data-name="채팅 효과">
+      <div class="say">
+        <div class="no">11 · 무대</div>
+        <h3>한 단어면<br>방 전체가 들썩</h3>
+        <p>대화창에 <b>/폭죽 /박수 /하트 /ㅋㅋ</b> 를 치면 방 모두의 화면에서 터져요. <b>/춤</b> 은 금빛 무대에서 다 같이, <b>/비 /눈</b> 엔 동물마다 자기 얼굴 우산을 펼쳐요.</p>
+        <div class="kw"><span>/폭죽</span><span>/박수</span><span>/하트</span><span>/ㅋㅋ</span><span>/춤</span><span>/비 /눈 /우산</span><span>남이 쓴 효과 끄기</span></div>
+      </div>
+      <div class="screen" role="img" aria-label="폭죽이 터지고 금빛 무대에서 동물들이 춤추며, 비가 오자 동물마다 얼굴 모양 우산을 쓴 장면" style="background:#252C44">
+        <div class="burst" aria-hidden="true" style="left:90px;top:70px"><i style="background:#F28482;--x:-40px;--y:-30px"></i><i style="background:#FFD666;--x:40px;--y:-30px"></i><i style="background:#7EE0C8;--x:0;--y:-48px"></i><i style="background:#9CD3FF;--x:-44px;--y:14px"></i><i style="background:#F28482;--x:44px;--y:14px"></i><i style="background:#FFD666;--x:0;--y:40px"></i></div>
+        <div class="burst" aria-hidden="true" style="left:190px;top:50px"><i style="background:#7EE0C8;--x:-34px;--y:-24px;animation-delay:.8s"></i><i style="background:#F28482;--x:34px;--y:-24px;animation-delay:.8s"></i><i style="background:#FFD666;--x:0;--y:-40px;animation-delay:.8s"></i><i style="background:#9CD3FF;--x:-36px;--y:16px;animation-delay:.8s"></i></div>
+        <div class="beam2" aria-hidden="true" style="left:40px"></div><div class="beam2" aria-hidden="true" style="left:200px"></div>
+        <div class="stage2" aria-hidden="true" style="left:40px;width:220px"></div>
+        <div class="slot" style="position:absolute;left:56px;bottom:130px;z-index:10"><div class="img dancing" style="background-image:url(assets/pets/rabbit.png)"></div></div>
+        <div class="slot" style="position:absolute;left:126px;bottom:130px;z-index:10"><div class="img dancing" style="background-image:url(assets/pets/chick.png);animation-delay:.15s"></div></div>
+        <div class="slot" style="position:absolute;left:196px;bottom:130px;z-index:10"><div class="img dancing" style="background-image:url(assets/pets/panda.png);animation-delay:.3s"></div></div>
+        <div class="fxw" style="left:92px;bottom:250px;color:#FFD666;font-size:20px">💃 PERFECT!</div>
+        <i class="rainline" style="right:40px;top:0"></i><i class="rainline" style="right:80px;top:0;animation-delay:.25s"></i><i class="rainline" style="right:120px;top:0;animation-delay:.5s"></i><i class="rainline" style="right:160px;top:0;animation-delay:.1s"></i><i class="rainline" style="right:200px;top:0;animation-delay:.4s"></i>
+        <div class="umb" data-kind="otter" data-size="70" style="right:86px;bottom:84px;z-index:12"></div>
+        <div class="umb" data-kind="cat" data-size="80" style="right:16px;bottom:94px;z-index:12"></div>
+        <div class="dock">
+          <div class="row">
+            <div class="slot"><div class="img" style="background-image:url(assets/pets/otter.png)"></div><div class="nm">수달</div></div>
+            <div class="slot me"><div class="img" style="background-image:url(assets/pets/cat.png)"></div><div class="nm">나</div></div>
+          </div>
+        </div>
+        <div class="taskbar" aria-hidden="true"><b></b><b></b><b></b><span>오후 6:00</span></div>
+      </div>
+    </div>
+
+    <div class="step" id="t-hide" data-name="숨기기">
+      <div class="say">
+        <div class="no">12 · 몰래 숨기</div>
+        <h3>화면 공유할 땐<br><kbd>Ctrl</kbd> <kbd>Alt</kbd> <kbd>Z</kbd></h3>
+        <p>회의에서 화면을 공유하거나 집중할 때, 한 번 누르면 펫과 대화창이 싹 숨어요. 한 번 더 누르면 그대로 돌아와요. 작업표시줄 트레이 아이콘에서도 꺼낼 수 있어요. 맥은 <kbd>⌃</kbd> <kbd>⌥</kbd> <kbd>Z</kbd>.</p>
+        <div class="kw"><span>한 번에 숨기기</span><span>트레이에서 다시</span><span>알림 끄기</span><span>전체 진하기</span></div>
+      </div>
+      <div class="screen" role="img" aria-label="Ctrl Alt Z 를 누르면 펫과 대화창이 사라졌다가 다시 누르면 돌아오는 장면">
+        <div aria-hidden="true" style="position:absolute;left:22px;top:22px;right:22px;height:200px;border-radius:10px;background:#3C4A6B;padding:14px">
+          <div style="font-size:12px;color:#C9D3EE;font-weight:700">🖥 화면 공유 중 · 주간 회의</div>
+          <i style="display:block;height:8px;width:70%;border-radius:4px;background:#4C5C82;margin-top:14px"></i>
+          <i style="display:block;height:8px;width:55%;border-radius:4px;background:#4C5C82;margin-top:10px"></i>
+          <i style="display:block;height:60px;width:40%;border-radius:6px;background:#4C5C82;margin-top:14px"></i>
+        </div>
+        <div class="keys" aria-hidden="true"><kbd>Ctrl</kbd><kbd>Alt</kbd><kbd>Z</kbd></div>
+        <div class="fxw shown-hint" style="right:20px;bottom:56px;color:#9AA3BD;font-size:12px;font-weight:600;text-shadow:none">펫이 숨었어요 · 한 번 더 누르면 돌아와요</div>
+        <div class="dock hideable">
+          <div class="uchat">
+            <div class="box">
+              <div class="lines" style="height:64px">
+                <div class="uline"><b>토끼</b>회의 시작해요~</div>
+                <div class="uline mine"><b>나</b>들어갈게요</div>
+              </div>
+              <div class="uin">놀이터 방에 말하기 (Enter)</div>
+            </div>
+            <div class="utabs"><div class="utab on">놀이터 3</div></div>
+          </div>
+          <div class="row">
+            <div class="slot"><div class="img" style="background-image:url(assets/pets/rabbit.png)"></div><div class="nm">토끼</div></div>
+            <div class="slot"><div class="img" style="background-image:url(assets/pets/sprout.png)"></div><div class="nm">새싹이</div></div>
+            <div class="slot me"><div class="img" style="background-image:url(assets/pets/cat.png)"></div><div class="nm">나</div></div>
+          </div>
+        </div>
+        <div class="taskbar" aria-hidden="true"><b></b><b></b><b></b><span>오전 10:00</span></div>
+      </div>
+    </div>
+
+    <div class="step" id="t-life" data-name="UFO · 업데이트">
+      <div class="say">
+        <div class="no">13 · 마을 생활</div>
+        <h3>UFO 로 방 이동,<br>새 버전은 버튼 하나</h3>
+        <p>다른 방으로 옮길 땐 UFO 가 데려가요. 누가 퇴근하면 남은 동물들이 손수건을 흔들며 배웅하고요. 새 버전이 나오면 펫이 먼저 알려 줘요 — Windows 는 <b>[지금 업데이트]</b> 한 번이면 끝.</p>
+        <div class="kw"><span>참가 링크로 입주</span><span>UFO 방 이동</span><span>손수건 배웅</span><span>자동 업데이트 알림</span><span>동물 35종</span></div>
+      </div>
+      <div class="screen" role="img" aria-label="UFO 가 동물을 태워 다른 방으로 데려가고, 새 버전 알림이 뜨고, 친구가 손수건으로 배웅하는 장면" style="background:#2A3150">
+        <div class="ufo2" aria-hidden="true" style="left:120px;top:60px"><div class="beam"></div><div class="disc"></div><div class="dome"></div></div>
+        <div class="slot lifted" style="position:absolute;left:150px;top:180px;z-index:24"><div class="img" style="background-image:url(assets/pets/ghost.png)"></div></div>
+        <div class="fxw" style="left:100px;top:30px;color:#C4B5FD;font-size:15px">🛸 개발팀 방으로 이동 중…</div>
+        <div class="dock">
+          <div class="upanel" style="border:1px solid #3fae6b;padding:7px 10px 8px">
+            <div style="font-size:12px;color:#e6f4ea;line-height:18px">🆕 새 버전 0.6.0 이 나왔어요. 받아 두었으니 누르면 바로 바뀌어요.</div>
+            <div class="ubtns" style="justify-content:flex-end;margin-top:4px"><span class="ubtn" style="background:#2E8B57">지금 업데이트</span><span class="ubtn">나중에</span></div>
+          </div>
+          <div class="row">
+            <div class="slot" style="position:relative"><div class="bubw loop-fade"><div class="ubub"><b>카피바라</b>내일 봐요!</div></div><div class="hanky2" style="left:-4px;top:2px"></div><div class="img" style="background-image:url(assets/pets/capybara.png)"></div><div class="nm">카피바라</div></div>
+            <div class="slot me"><div class="img" style="background-image:url(assets/pets/cat.png)"></div><div class="nm">나</div></div>
+          </div>
+        </div>
+        <div class="taskbar" aria-hidden="true"><b></b><b></b><b></b><span>오후 6:02</span></div>
+      </div>
+    </div>
+  </section>
+  <nav class="tour-nav" aria-label="마을 구경 순서"></nav>
+
+  <section id="zoo">
+    <h2>마을 주민 35종</h2>
+    <p class="sub">내 동물은 언제든 바꿀 수 있어요. 고르지 않으면 한 마리를 골라 드려요.</p>
+    <div class="zoo" role="img" aria-label="고를 수 있는 동물 35종">
+      <span class="pet" style="background-image:url(assets/pets/cat.png)"></span><span class="pet" style="background-image:url(assets/pets/dog.png);animation-delay:.1s"></span><span class="pet" style="background-image:url(assets/pets/rabbit.png);animation-delay:.2s"></span><span class="pet" style="background-image:url(assets/pets/chick.png);animation-delay:.3s"></span><span class="pet" style="background-image:url(assets/pets/penguin.png);animation-delay:.4s"></span><span class="pet" style="background-image:url(assets/pets/hamster.png);animation-delay:.5s"></span><span class="pet" style="background-image:url(assets/pets/fox.png);animation-delay:.6s"></span><span class="pet" style="background-image:url(assets/pets/bear.png);animation-delay:.7s"></span><span class="pet" style="background-image:url(assets/pets/panda.png);animation-delay:.8s"></span><span class="pet" style="background-image:url(assets/pets/frog.png);animation-delay:.9s"></span><span class="pet" style="background-image:url(assets/pets/pig.png);animation-delay:1s"></span><span class="pet" style="background-image:url(assets/pets/mouse.png);animation-delay:1.1s"></span>
+      <span class="pet" style="background-image:url(assets/pets/duck.png)"></span><span class="pet" style="background-image:url(assets/pets/owl.png);animation-delay:.1s"></span><span class="pet" style="background-image:url(assets/pets/monkey.png);animation-delay:.2s"></span><span class="pet" style="background-image:url(assets/pets/sheep.png);animation-delay:.3s"></span><span class="pet" style="background-image:url(assets/pets/tiger.png);animation-delay:.4s"></span><span class="pet" style="background-image:url(assets/pets/ox.png);animation-delay:.5s"></span><span class="pet" style="background-image:url(assets/pets/snake.png);animation-delay:.6s"></span><span class="pet" style="background-image:url(assets/pets/horse.png);animation-delay:.7s"></span><span class="pet" style="background-image:url(assets/pets/rooster.png);animation-delay:.8s"></span><span class="pet" style="background-image:url(assets/pets/shark.png);animation-delay:.9s"></span><span class="pet" style="background-image:url(assets/pets/dragon.png);animation-delay:1s"></span><span class="pet" style="background-image:url(assets/pets/parrot.png);animation-delay:1.1s"></span>
+      <span class="pet" style="background-image:url(assets/pets/hedgehog.png)"></span><span class="pet" style="background-image:url(assets/pets/otter.png);animation-delay:.1s"></span><span class="pet" style="background-image:url(assets/pets/seal.png);animation-delay:.2s"></span><span class="pet" style="background-image:url(assets/pets/ghost.png);animation-delay:.3s"></span><span class="pet" style="background-image:url(assets/pets/sprout.png);animation-delay:.4s"></span><span class="pet" style="background-image:url(assets/pets/unicorn.png);animation-delay:.5s"></span><span class="pet" style="background-image:url(assets/pets/capybara.png);animation-delay:.6s"></span><span class="pet" style="background-image:url(assets/pets/axolotl.png);animation-delay:.7s"></span><span class="pet" style="background-image:url(assets/pets/bluecat.png);animation-delay:.8s"></span><span class="pet" style="background-image:url(assets/pets/mochi.png);animation-delay:.9s"></span><span class="pet" style="background-image:url(assets/pets/lemonbun.png);animation-delay:1s"></span>
+    </div>
+  </section>
+
+  <section class="gate">
+    <div style="flex:1 1 360px">
+      <h2>마을 만들기는 3단계</h2>
+      <p>한 명이 설치하고 방을 만들어요 → 펫이 주는 참가 링크를 보내요 → 팀원은 붙여 넣으면 입주 끝. 새 버전이 나오면 펫이 알려 주고, 버튼 하나로 바뀌어요.</p>
+    </div>
+    <div class="cta" style="margin:0">
+      <a class="btn go" style="background:#FFD666;color:#24331F" href="https://github.com/kimdonghuyn/team-pet/releases/latest">Windows 받기</a>
+      <a class="btn mac" href="https://github.com/kimdonghuyn/team-pet/releases/latest">macOS 받기</a>
+    </div>
+  </section>
+</main>
+<script>
+// Each animal's own umbrella, the same shapes the pet draws (server/pet.ps1 Umbrella, UMB_KIND):
+// a low dome of four panels with a scalloped hem, the animal's ears (horns, spikes...) and face,
+// and a crook handle. [colour, what sticks up, nose, ear colour, cap colour]
+const UMB_KIND = {
+  cat: ['#F4A261', 'pointy'], dog: ['#C9A27E', 'floppy'], rabbit: ['#EFE9F4', 'long'], chick: ['#F6D365', 'tuft', 'beak'],
+  penguin: ['#4A4E69', '', 'beak'], hamster: ['#E9B87A', 'round'], fox: ['#E07A5F', 'pointy'], bear: ['#9C6B4E', 'round'],
+  panda: ['#F2F2F2', 'round'], frog: ['#81B29A', 'frog'], pig: ['#F4B6C2', 'pointy', 'snout'], mouse: ['#B8B8C8', 'big'],
+  parrot: ['#6BCB77', 'tuft', 'beak'], owl: ['#A0785A', 'pointy', 'beak'], hedgehog: ['#9C7A5B', 'spikes'], duck: ['#F7E07E', 'tuft', 'beak'],
+  tiger: ['#F4A261', 'pointy'], ox: ['#D9CBB8', 'horns'], snake: ['#7FB77E', ''], horse: ['#A47551', 'pointy'],
+  sheep: ['#F5F0E6', 'floppy'], monkey: ['#B07D56', 'side'], rooster: ['#F2E9DC', 'comb', 'beak'], shark: ['#7D9DB5', 'fin'], dragon: ['#6FB98F', 'horns'],
+  mochi: ['#FFFFFF', 'round'], bluecat: ['#FFFFFF', 'pointy', '', '#6F9CC6', '#6F9CC6'], lemonbun: ['#F6E3A6', 'long'],
+  otter: ['#A9744F', 'round'], seal: ['#D5DEE8', ''], ghost: ['#FFFFFF', ''], sprout: ['#D8F2B0', 'tuft'], unicorn: ['#FFFFFF', 'horn', '', '#FFFFFF', '#B39DDB'],
+  capybara: ['#C9925E', 'round'], axolotl: ['#FFC2D4', 'gills'],
+};
+const SOFT = ['mochi', 'bluecat', 'lemonbun', 'otter', 'seal', 'ghost', 'sprout', 'unicorn', 'capybara', 'axolotl'];
+function shade(hex, f) {
+  const n = parseInt(hex.slice(1), 16);
+  return '#' + [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => Math.floor(v * f).toString(16).padStart(2, '0')).join('');
+}
+function umbrellaSvg(kind, wd) {
+  const [color, style = '', nose = '', earFill = color, capFill = ''] = UMB_KIND[kind] || ['#C3B1E1', 'pointy'];
+  const soft = SOFT.includes(kind);
+  const r = wd / 2, h = +(wd * 0.34).toFixed(1), hl = +(h + wd * 0.55).toFixed(1), dip = 5;
+  const dp = (deg, out) => { const a = deg * Math.PI / 180; return [r + (r + out) * Math.cos(a), h - (h + out) * Math.sin(a)]; };
+  const poly = (fill, pts) => `<polygon fill="${fill}" points="${pts.map((p) => p.join(',')).join(' ')}"/>`;
+  const oval = (fill, cx, cy, rx, ry, ang = 0) => `<ellipse fill="${fill}" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}"${ang ? ` transform="rotate(${ang} ${cx} ${cy})"` : ''}/>`;
+  const pink = '#F2B5B5', dark = shade(color, 0.78);
+  let back = '', front = '';
+  for (const sd of [1, -1]) {
+    if (style === 'pointy') { const m0 = 90 + sd * 28; back += poly(earFill, [dp(m0 + 13, 0), dp(m0 - 13, 0), dp(m0, r * 0.34)]) + poly(pink, [dp(m0 + 8, 1), dp(m0 - 8, 1), dp(m0, r * 0.22)]); }
+    if (style === 'round' || style === 'big') { const [x, y] = dp(90 + sd * 30, r * 0.05), er = r * (style === 'big' ? 0.27 : 0.2); back += oval(kind === 'panda' ? '#2E2E2E' : color, x, y, er, er); if (kind !== 'panda') back += oval(pink, x, y, er * 0.55, er * 0.55); }
+    if (style === 'long') { const [x, y] = dp(90 + sd * 16, r * 0.42); back += oval(color, x, y, r * 0.12, r * 0.42, -sd * 12) + oval(pink, x, y + 2, r * 0.055, r * 0.3, -sd * 12); }
+    if (style === 'horns') { const m0 = 90 + sd * 28; back += poly('#F2E3C6', [dp(m0 + 7, 0), dp(m0 - 7, 0), dp(m0 - sd * 4, r * 0.42)]); }
+    if (style === 'frog') { const [x, y] = dp(90 + sd * 25, r * 0.04); back += oval(color, x, y, r * 0.17, r * 0.17); }
+  }
+  if (style === 'horn') back += poly('#FFD166', [dp(98, 0), dp(82, 0), dp(90, r * 0.5)]);
+  if (style === 'tuft') for (const j of [-1, 0, 1]) { const [x, y] = dp(90 - j * 7, r * 0.12); back += oval(dark, x, y, r * 0.05, r * 0.16, j * 25); }
+  if (style === 'comb') for (const j of [-1, 0, 1]) { const [x, y] = dp(90 - j * 9, r * 0.06); back += oval('#E05A47', x, y, r * 0.1, r * 0.1); }
+  if (style === 'spikes') for (let deg = 160; deg >= 20; deg -= 20) back += poly('#7A5C43', [dp(deg + 7, 0), dp(deg - 7, 0), dp(deg, r * 0.2)]);
+  if (style === 'fin') back += poly(dark, [dp(106, 0), dp(80, 0), dp(100, r * 0.5)]);
+  const xs = [0, 1, 2, 3, 4].map((i) => i * wd / 4);
+  const hem = [4, 3, 2, 1].map((i) => `Q ${(xs[i] + xs[i - 1]) / 2},${h - dip} ${xs[i - 1]},${h}`).join(' ');
+  let dome = `<path d="M 0,${h} A ${r},${h} 0 0 1 ${wd},${h} ${hem} Z" fill="${color}" stroke="${soft ? 'rgba(42,36,38,.85)' : 'rgba(0,0,0,.22)'}" stroke-width="${soft ? 1.6 : 1}"/>`;
+  if (capFill) { const a = dp(125, 0), b = dp(55, 0); dome += `<path d="M ${a[0]},${a[1]} A ${r},${h} 0 0 1 ${b[0]},${b[1]} Z" fill="${capFill}"/>`; }
+  for (const i of [1, 3]) dome += `<path d="M ${r},0.5 L ${xs[i]},${h} Q ${(xs[i] + xs[i + 1]) / 2},${h - dip} ${xs[i + 1]},${h} Z" fill="${soft ? 'rgba(0,0,0,.05)' : 'rgba(0,0,0,.12)'}"/>`;
+  for (const sd of [1, -1]) {
+    if (style === 'floppy') front += oval(dark, r - sd * r * 0.92, h * 0.78, r * 0.13, r * 0.3, sd * 20);
+    if (style === 'side') front += oval(color, r - sd * r, h * 0.6, r * 0.17, r * 0.17) + oval('#E8C9A5', r - sd * r, h * 0.6, r * 0.1, r * 0.1);
+    if (style === 'gills') for (const j of [-1, 0, 1]) front += oval('#FF6F91', r - sd * r * 1.04, h * (0.56 + j * 0.2), r * 0.16, r * 0.05, sd * j * 22);
+    if (style === 'frog') { const [x, y] = dp(90 + sd * 25, r * 0.04); front += oval('#FFFFFF', x, y, r * 0.1, r * 0.1) + oval('#3A3045', x, y, r * 0.05, r * 0.05); }
+    else {
+      const ex = r - sd * r * 0.2, ey = h * 0.56, eye = Math.max(1.3, r * 0.055);
+      if (kind === 'panda') front += oval('#3A3A3A', ex, ey, r * 0.1, r * 0.075, sd * 25);
+      front += oval(soft ? '#1C1718' : (kind === 'panda' || kind === 'penguin') ? '#FFFFFF' : '#3A3045', ex, ey, eye, soft ? eye * 1.6 : eye);
+    }
+    front += oval(soft ? 'rgba(247,168,184,.85)' : 'rgba(242,132,130,.33)', r - sd * r * 0.36, h * 0.74, r * (soft ? 0.11 : 0.08), r * (soft ? 0.06 : 0.045));
+  }
+  if (nose === 'beak') front += poly('#F2A541', [[r - r * 0.07, h * 0.64], [r + r * 0.07, h * 0.64], [r, h * 0.78]]);
+  else if (nose === 'snout') front += oval('#E89AAB', r, h * 0.72, r * 0.11, r * 0.075) + oval('#9C5B6B', r - r * 0.04, h * 0.72, 1, 1) + oval('#9C5B6B', r + r * 0.04, h * 0.72, 1, 1);
+  else if (soft) front += `<polyline points="${r - r * 0.06},${h * 0.67} ${r},${h * 0.76} ${r + r * 0.06},${h * 0.67}" fill="none" stroke="#2A2426" stroke-width="${Math.max(1, r * 0.03)}" stroke-linejoin="round"/>`;
+  else if (style !== 'frog') front += oval('#3A3045', r, h * 0.68, r * 0.035, r * 0.028);
+  const handle = `<path d="M ${r},${h} L ${r},${hl} A 3.5,3.5 0 0 1 ${r - 7},${hl}" fill="none" stroke="#A89DBE" stroke-width="1.8" stroke-linecap="round"/>`;
+  return `<svg width="${wd}" height="${hl + 4}" viewBox="0 0 ${wd} ${hl + 4}" aria-hidden="true">${handle}${back}${dome}${front}</svg>`;
+}
+for (const el of document.querySelectorAll('.umb[data-kind]')) el.innerHTML = umbrellaSvg(el.dataset.kind, Number(el.dataset.size) || 82);
+</script>
+<script>
+// 마을 구경: each scene comes up (and starts moving) as it scrolls into view; the dots on the right
+// say which one is in front, and take you to any of them.
+(() => {
+  const steps = [...document.querySelectorAll('.step')];
+  const nav = document.querySelector('.tour-nav');
+  nav.innerHTML = steps.map((st) => '<a href="#' + st.id + '"><span>' + st.dataset.name + '</span><i></i></a>').join('');
+  const links = [...nav.querySelectorAll('a')];
+  const seen = new IntersectionObserver((es) => { for (const e of es) if (e.isIntersecting) e.target.classList.add('in'); }, { threshold: 0.25 });
+  for (const st of steps) seen.observe(st);
+  const mark = () => {
+    const mid = innerHeight / 2;
+    let cur = -1;
+    steps.forEach((st, i) => { const r = st.getBoundingClientRect(); if (r.top < mid && r.bottom > mid) cur = i; });
+    links.forEach((x, i) => x.classList.toggle('cur', i === cur));
+    nav.classList.toggle('on', cur >= 0);
+  };
+  addEventListener('scroll', mark, { passive: true });
+  mark();
+})();
+</script>
+<footer>팀 펫 · 같은 사무실 네트워크 안에서만 오가요 · MIT · <a href="https://github.com/kimdonghuyn/team-pet">GitHub</a></footer>
+</body>
+</html>

@@ -1,0 +1,39 @@
+/* The real pets (client/assets/pets: 4 frames of 16×16 side by side), shared by the drafts. */
+.pet{position:absolute;width:56px;height:56px;background-size:400% 100%;background-repeat:no-repeat;image-rendering:pixelated;animation:pet-idle 1.2s steps(1) infinite}
+.pet.s{width:40px;height:40px}
+.pet.l{width:72px;height:72px}
+.pet.xl{width:96px;height:96px}
+.pet.static{position:static;display:inline-block}
+.pet.talk{animation:pet-talk .4s steps(1) infinite}
+.pet.hop{animation:pet-idle 1.2s steps(1) infinite,pet-hop 1.6s ease-in-out infinite}
+.pet.walk{animation:pet-talk .3s steps(1) infinite,pet-walk 7s linear infinite}
+.pet.flip{transform:scaleX(-1)}
+@keyframes pet-idle{0%{background-position:0 0}50%{background-position:33.333% 0}}
+@keyframes pet-talk{0%{background-position:0 0}50%{background-position:100% 0}}
+@keyframes pet-hop{0%,60%,100%{translate:0 0}75%{translate:0 -14px}}
+@keyframes pet-walk{0%{translate:0 0}50%{translate:120px 0}100%{translate:0 0}}
+.p-cat{background-image:url(assets/pets/cat.png)}
+.p-dog{background-image:url(assets/pets/dog.png)}
+.p-rabbit{background-image:url(assets/pets/rabbit.png)}
+.p-otter{background-image:url(assets/pets/otter.png)}
+.p-axolotl{background-image:url(assets/pets/axolotl.png)}
+.p-capy{background-image:url(assets/pets/capybara.png)}
+.p-penguin{background-image:url(assets/pets/penguin.png)}
+.p-frog{background-image:url(assets/pets/frog.png)}
+.p-ghost{background-image:url(assets/pets/ghost.png)}
+.p-duck{background-image:url(assets/pets/duck.png)}
+.p-fox{background-image:url(assets/pets/fox.png)}
+.p-sprout{background-image:url(assets/pets/sprout.png)}
+.p-seal{background-image:url(assets/pets/seal.png)}
+.p-unicorn{background-image:url(assets/pets/unicorn.png)}
+.p-panda{background-image:url(assets/pets/panda.png)}
+.p-hamster{background-image:url(assets/pets/hamster.png)}
+.snowman{position:absolute;width:54px;height:90px;background:url(assets/snowmen/cat.png) no-repeat center/contain;image-rendering:pixelated}
+.snowman.penguin{background-image:url(assets/snowmen/penguin.png)}
+.rod{position:absolute;width:90px;height:90px;background-size:1200% 100%;background-repeat:no-repeat;image-rendering:pixelated}
+/* A speech bubble over a pet. */
+.bub{position:absolute;background:#fff;color:#1E1B2E;border-radius:12px;padding:6px 10px;font:500 13px/1.35 'Noto Sans KR',sans-serif;white-space:nowrap;box-shadow:0 3px 0 rgba(0,0,0,.18);z-index:2}
+.bub::after{content:"";position:absolute;left:16px;bottom:-6px;border:6px solid transparent;border-top-color:#fff;border-bottom:0}
+.bub.called{background:#FFE08A}.bub.called::after{border-top-color:#FFE08A}
+.bub.note{background:#E9DDFF}.bub.note::after{border-top-color:#E9DDFF}
+@media (prefers-reduced-motion: reduce){.pet,.pet.hop,.pet.walk,.pet.talk{animation:none}}

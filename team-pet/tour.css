@@ -1,0 +1,163 @@
+/* 마을 구경: one scene per thing the pet does, scrolled through one at a time.
+   Each scene is a desktop with the pet on it, drawn with the pet's own look (client/pet.css:
+   the same panel rims, bubbles, chat box, tabs, menu, names, Pretendard) so it reads as the real app. */
+@font-face{font-family:"Pretendard Variable";src:url("assets/fonts/PretendardVariable.woff2") format("woff2-variations");font-weight:45 920;font-display:swap}
+
+.tour{position:relative;padding:40px 0 20px}
+.tour > h2{font-size:42px;text-align:center}
+.tour > .sub{text-align:center;color:var(--soft);font-size:17px;margin:12px 0 0}
+.step{display:flex;flex-wrap:wrap;align-items:center;gap:48px;min-height:78vh;padding:60px 0;opacity:0;transform:translateY(60px);transition:opacity .7s ease,transform .7s ease}
+.step.in{opacity:1;transform:none}
+.step:nth-of-type(even){flex-direction:row-reverse}
+.step .say{flex:1 1 320px;min-width:0}
+.step .say .no{font-family:'Jua',sans-serif;color:#2F7A3D;font-size:18px}
+.step .say h3{font-size:36px;margin-top:6px;line-height:1.2}
+.step .say p{color:var(--soft);font-size:17px;line-height:1.75;margin:14px 0 0}
+.step .say .kw{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.step .say .kw span{background:#F4F1E6;border-radius:999px;padding:5px 12px;font-size:14px}
+.step .say kbd{display:inline-block;min-width:34px;padding:3px 8px;border-radius:7px;background:#fff;border:1px solid #D9D2BE;border-bottom-width:3px;font:700 14px 'Noto Sans KR',sans-serif;text-align:center}
+/* Nothing in a scene moves until it scrolls into view. */
+.step:not(.in) .screen *{animation-play-state:paused !important}
+
+/* ── the desktop ── */
+.screen{flex:1 1 560px;min-width:0;position:relative;height:420px;border-radius:18px;overflow:hidden;background:#2F3B57;box-shadow:0 18px 40px rgba(36,51,31,.18);font-family:"Pretendard Variable","Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:12px;color:#fff}
+.screen .wall-win{position:absolute;left:22px;top:22px;width:48%;height:150px;border-radius:10px;background:#3C4A6B}
+.screen .wall-win i{display:block;height:7px;border-radius:4px;background:#4C5C82;margin:14px 14px 0}
+.screen .taskbar{position:absolute;left:0;right:0;bottom:0;height:34px;background:#141824;display:flex;align-items:center;gap:8px;padding:0 12px;z-index:30}
+.screen .taskbar b{width:18px;height:18px;border-radius:5px;background:#3A4460;display:block}
+.screen .taskbar b:first-child{background:#5B7BD5}
+.screen .taskbar span{margin-left:auto;color:#9AA3BD;font-size:11px}
+/* The pet's corner: everything stacks over the row at the bottom right, as in the app. */
+.dock{position:absolute;right:12px;bottom:38px;display:flex;flex-direction:column;align-items:flex-end;z-index:10}
+.row{display:flex;align-items:flex-end;gap:4px}
+.slot{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;position:relative}
+.slot .img{width:48px;height:48px;background-size:400% 100%;background-repeat:no-repeat;image-rendering:pixelated;transform-origin:50% 100%;animation:pet-idle 1.2s steps(1) infinite}
+.slot.me .img{width:58px;height:58px}
+.slot .nm{font-size:10px;color:#fff;white-space:nowrap;text-shadow:0 0 3px #000,0 0 3px #000}
+.slot .bubw{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:2px;z-index:12}
+/* The bubble, exactly the app's: white, the name on its own small violet line. */
+.ubub{max-width:180px;width:max-content;background:rgba(255,255,255,.97);color:#2a2340;border:1px solid rgba(0,0,0,.19);border-radius:9px;padding:4px 7px;font-size:12px;line-height:1.35}
+.ubub b{display:block;font-size:10.5px;color:#6c5ce7}
+.ubub.called{background:#fff4c2;border:2px solid #f59e0b}
+.ubub.note{background:#ede7ff;border:2px solid #8b5cf6}
+.utag{display:inline-block;padding:0 5px;border-radius:8px;background:rgba(245,158,11,.18);color:#b45309;font-weight:700}
+/* Panels: 250 wide, dark, rounded, a 2px rim in each one's colour. */
+.upanel{width:250px;background:rgba(30,27,46,.95);border:2px solid #7c6cf0;border-radius:10px;padding:10px;margin:0 4px 3px 0;color:#fff}
+.upanel .t{font-size:11px;font-weight:700;white-space:pre-wrap}
+.upanel .tx{font-size:13px;text-align:center;white-space:pre-wrap;margin-top:6px;line-height:1.35}
+.ubtns{display:flex;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.ubtn{font:inherit;font-size:13px;border:0;border-radius:9px;padding:5px 12px;margin:3px;background:#3b355a;color:#fff}
+.ubtn.hot{background:#3b7dd8}
+/* The chat box with its tabs. */
+.uchat{display:flex;flex-direction:column;align-items:flex-end;margin:0 4px 3px 0}
+.uchat .box{width:250px;background:rgba(30,27,46,.95);border-radius:10px;padding:8px}
+.uchat .lines{height:118px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;margin-bottom:6px}
+.uline{font-size:12px;color:#f1eefc;margin-bottom:3px;line-height:1.35}
+.uline b{font-size:11px;font-weight:700;color:#b3a6ff;margin-right:6px}
+.uline.mine b{color:#7fdca4}
+.uline.called{color:#ffd84d;font-weight:600}
+/* Lines come in one after another (each its own --d), stay, and the talk starts over. */
+.uline.pop{animation:linein 9s infinite both;animation-delay:var(--d,0s)}
+@keyframes linein{0%{opacity:0;max-height:0}6%,88%{opacity:1;max-height:40px}96%,100%{opacity:0;max-height:40px}}
+.uin{font-size:12px;padding:3px 5px;background:#2a2640;color:#8f86b8;border:1px solid #4a4470}
+.utabs{display:flex;align-self:flex-start;margin-left:12px}
+.utab{font-size:11px;border-radius:0 0 8px 8px;padding:3px 10px 5px;margin-right:3px;background:rgba(19,17,32,.95);color:#8f86b8;white-space:nowrap}
+.utab.on{background:rgba(30,27,46,.95);color:#f1eefc;font-weight:700}
+/* The right-click menu. */
+.umenu{position:absolute;z-index:20;background:rgba(30,27,46,.96);border:1px solid #2e2a42;border-radius:10px;padding:4px;box-shadow:2px 2px 8px rgba(0,0,0,.5);font-size:12px;color:#cfc9e6}
+.umenu .mh{color:#7d769e;font-size:11px;font-weight:700;margin:6px 10px 2px}
+.umenu .mi{display:grid;grid-template-columns:18px 1fr auto;align-items:center;min-width:170px;padding:5px 10px 5px 8px;border-radius:6px;white-space:nowrap}
+.umenu .mi.open{background:#2a2640}
+.umenu .mi .ar{color:#7d769e;font-size:14px;margin-left:14px}
+.umenu .sep{height:1px;margin:4px 8px;background:#2a2640}
+/* Effects words, as the pet writes them. */
+.fxw{position:absolute;z-index:25;font-weight:800;white-space:nowrap;text-shadow:0 2px 0 rgba(0,0,0,.35)}
+
+/* ── the steps' own moving parts ── */
+.loop-fade{animation:loopfade 6s infinite}
+@keyframes loopfade{0%,8%{opacity:0;transform:translateY(8px)}14%,80%{opacity:1;transform:none}90%,100%{opacity:0}}
+.menu-in{animation:menuin 7s infinite}
+@keyframes menuin{0%,6%{opacity:0;transform:scale(.92)}12%,58%{opacity:1;transform:none}64%,100%{opacity:0}}
+.aim-in{animation:aimin 7s infinite}
+@keyframes aimin{0%,62%{opacity:0}66%,100%{opacity:1}}
+.flyhoop{animation:flyhoop 7s cubic-bezier(.3,.1,.5,1) infinite}
+@keyframes flyhoop{0%,74%{transform:translate(0,0) rotate(0);opacity:1}86%{transform:translate(-120px,-150px) rotate(-260deg)}96%{transform:translate(-205px,-74px) rotate(-520deg);opacity:1}100%{transform:translate(-205px,-74px);opacity:0}}
+.goal-pop{animation:goalpop 7s infinite}
+@keyframes goalpop{0%,94%{opacity:0;transform:scale(.5)}97%{opacity:1;transform:scale(1.15)}100%{opacity:0}}
+.dots{position:absolute;z-index:22;width:150px;height:110px;border-top:3px dotted #FFB347;border-radius:100% 0 0 0;transform:scaleX(-1)}
+.power{position:absolute;z-index:22;width:16px;height:90px;border:2px solid #fff;border-radius:8px;background:#2a2640;overflow:hidden}
+.power i{position:absolute;left:0;right:0;bottom:0;background:#FF9F1C;animation:fill 1.4s ease-in-out infinite alternate}
+.power i::after{content:"";position:absolute;left:0;right:0;top:0;height:10%;background:#9C6BFF}
+@keyframes fill{from{height:5%}to{height:96%}}
+.green-hole{position:absolute;bottom:34px;height:30px;border-radius:50% 50% 0 0;background:#5FB44A}
+.rollin{animation:rollin 5s ease-out infinite}
+@keyframes rollin{0%{transform:translate(-280px,-120px) rotate(0)}30%{transform:translate(-160px,0) rotate(-240deg)}45%{transform:translate(-110px,-30px) rotate(-320deg)}60%,88%{transform:translate(0,4px) rotate(-560deg);opacity:1}100%{transform:translate(0,4px);opacity:0}}
+.tospace{animation:tospace 5s ease-in infinite}
+@keyframes tospace{0%{transform:translate(0,0) rotate(0)}100%{transform:translate(-260px,-360px) rotate(-900deg) scale(.4);opacity:0}}
+.snowbar{position:absolute;z-index:22;width:100px;height:14px;border-radius:7px;background:#2a2640;border:1px solid #9CD3FF}
+.snowbar .zone{position:absolute;left:40px;top:2px;width:20px;height:8px;border-radius:4px;background:#5DADEC}
+.snowbar .flake{position:absolute;top:-3px;left:0;width:16px;height:16px;line-height:16px;font-size:13px;text-align:center;animation:flake 1.04s ease-in-out infinite alternate}
+@keyframes flake{from{transform:translateX(0)}to{transform:translateX(84px)}}
+.ballfly{animation:ballfly 6s ease-in infinite}
+@keyframes ballfly{0%,30%{opacity:0;transform:translate(0,0)}32%{opacity:1}52%{transform:translate(-170px,-40px)}60%{transform:translate(-250px,10px);opacity:1}62%,100%{opacity:0}}
+.becomes-snow{animation:becomesnow 6s infinite}
+@keyframes becomesnow{0%,60%{opacity:0}62%,92%{opacity:1}96%,100%{opacity:0}}
+.hide-when-snow{animation:hidesnow 6s infinite}
+@keyframes hidesnow{0%,60%{opacity:1}62%,92%{opacity:0}96%,100%{opacity:1}}
+.rodanim{position:absolute;z-index:11;width:100px;height:76px;background-size:1200% 100%;background-repeat:no-repeat;image-rendering:pixelated;animation:rodframes 2.4s steps(12) infinite}
+@keyframes rodframes{from{background-position:0 0}to{background-position:-1200px 0}}
+.bobber{position:absolute;z-index:11;width:9px;height:9px;border-radius:50%;background:#E5484D;box-shadow:0 0 0 1px #fff;animation:bob 3s infinite}
+@keyframes bob{0%,55%,100%{transform:translateY(0)}60%,70%{transform:translateY(7px)}}
+.fishcard{position:absolute;z-index:24;width:116px;background:rgba(30,27,46,.95);border:2px solid #F2C14E;border-radius:10px;padding:6px 8px;text-align:center;animation:catch 6s infinite}
+.fishcard .f{height:26px;margin:2px auto 4px;width:60px;border-radius:50% 40% 40% 50%;background:#FFB36B;position:relative}
+.fishcard .f::after{content:"";position:absolute;right:-12px;top:5px;border:8px solid transparent;border-left:12px solid #FFB36B}
+@keyframes catch{0%,40%{opacity:0;transform:translateY(40px) scale(.6)}48%,90%{opacity:1;transform:none}100%{opacity:0}}
+.gauge{height:12px;border-radius:6px;background:#2a2640;margin-top:6px;position:relative;overflow:hidden}
+.gauge i{position:absolute;left:0;top:0;bottom:0;width:42%;background:#F59E0B}
+.gauge span{position:absolute;inset:0;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.rodpic{width:70px;height:53px;background-size:1200% 100%;background-repeat:no-repeat;image-rendering:pixelated;display:inline-block}
+.forge-glow{animation:forgeglow 4s infinite}
+@keyframes forgeglow{0%,40%{filter:none;transform:none}48%{transform:translateX(-3px)}52%{transform:translateX(3px)}56%{transform:none;filter:drop-shadow(0 0 10px #FFD666)}90%,100%{filter:drop-shadow(0 0 10px #FFD666)}}
+.forge-ok{animation:forgeok 4s infinite}
+@keyframes forgeok{0%,55%{opacity:0;transform:scale(.6)}62%,92%{opacity:1;transform:none}100%{opacity:0}}
+.step-p{position:absolute;bottom:34px;width:56px;border-radius:4px 4px 0 0;text-align:center;font-weight:800;font-size:15px;color:#3A2A00}
+.urow{display:flex;justify-content:space-between;font-size:12px;padding:3px 6px;border-radius:6px;margin-top:3px;background:#2a2640}
+.urow.me{outline:1px solid #f5c542}
+.tower-box{width:220px;height:200px;margin:6px auto 0;background:#141221;border-radius:6px;position:relative;overflow:hidden}
+.tower-box .blk{position:absolute;height:16px;border-radius:2px}
+.tower-box .mv{animation:mv 1.3s ease-in-out infinite alternate}
+@keyframes mv{from{transform:translateX(-60px)}to{transform:translateX(60px)}}
+.sheet{width:220px;height:150px;margin:6px auto 0;background:#fff;border-radius:6px}
+.keys{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);display:flex;gap:8px;z-index:40}
+.keys kbd{min-width:52px;padding:10px 12px;border-radius:10px;background:#fff;color:#24331F;border:1px solid #D9D2BE;border-bottom-width:5px;font:800 18px 'Noto Sans KR',sans-serif;text-align:center;animation:press 6s infinite}
+@keyframes press{0%,18%{transform:none;border-bottom-width:5px}22%,26%{transform:translateY(3px);border-bottom-width:2px}30%,68%{transform:none;border-bottom-width:5px}72%,76%{transform:translateY(3px);border-bottom-width:2px}80%,100%{transform:none}}
+.hideable{animation:hideable 6s infinite}
+@keyframes hideable{0%,22%{opacity:1;transform:none}30%,70%{opacity:0;transform:translateY(10px)}78%,100%{opacity:1;transform:none}}
+.shown-hint{animation:shownhint 6s infinite}
+@keyframes shownhint{0%,26%{opacity:0}32%,68%{opacity:1}74%,100%{opacity:0}}
+.ufo2{position:absolute;z-index:25;width:110px;height:100px;animation:ufo2 7s ease-in-out infinite}
+.ufo2 .disc{position:absolute;left:5px;top:20px;width:100px;height:24px;border-radius:50%;background:#B8B3D9;box-shadow:inset 0 -6px 0 #8E87C2}
+.ufo2 .dome{position:absolute;left:31px;top:2px;width:48px;height:28px;border-radius:50% 50% 0 0;background:#E3F4FF;border:3px solid #8E87C2;border-bottom:0}
+.ufo2 .beam{position:absolute;left:25px;top:42px;width:60px;height:70px;background:rgba(255,240,150,.45);clip-path:polygon(25% 0,75% 0,100% 100%,0 100%)}
+@keyframes ufo2{0%{transform:translate(-160px,-40px)}30%,55%{transform:translate(0,0)}100%{transform:translate(260px,-120px)}}
+.lifted{animation:lifted 7s ease-in-out infinite}
+@keyframes lifted{0%,30%{transform:none;opacity:1}50%{transform:translateY(-60px)}55%{transform:translateY(-66px)}100%{transform:translate(260px,-186px);opacity:1}}
+.hanky2{position:absolute;width:14px;height:11px;background:#fff;border:1px solid #ccc;z-index:13;animation:hanky2 .45s ease-in-out infinite alternate;transform-origin:bottom left}
+@keyframes hanky2{from{transform:rotate(-24deg)}to{transform:rotate(20deg)}}
+.stage2{position:absolute;bottom:120px;height:10px;border-radius:5px;background:#C9A227;box-shadow:0 3px 0 #8C6A1E;z-index:9}
+.beam2{position:absolute;bottom:130px;width:60px;height:120px;background:rgba(255,214,102,.25);clip-path:polygon(45% 0,55% 0,100% 100%,0 100%);z-index:8}
+.dancing{animation:pet-talk .3s steps(1) infinite,bob2 .6s ease-in-out infinite}
+@keyframes bob2{0%,100%{translate:0 0}50%{translate:0 -10px}}
+.rainline{position:absolute;width:2px;height:12px;background:rgba(160,200,255,.8);animation:rain2 .7s linear infinite;z-index:7}
+@keyframes rain2{from{transform:translateY(-40px)}to{transform:translateY(380px)}}
+
+/* The dots on the right: where in the village I am. */
+.tour-nav{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:30;display:flex;flex-direction:column;gap:8px;opacity:0;transition:opacity .3s}
+.tour-nav.on{opacity:1}
+.tour-nav a{display:flex;align-items:center;justify-content:flex-end;gap:8px;text-decoration:none;color:var(--soft);font-size:12px}
+.tour-nav a span{opacity:0;transition:opacity .2s;background:#fff;border-radius:6px;padding:2px 8px;box-shadow:0 1px 0 rgba(0,0,0,.08)}
+.tour-nav a i{width:10px;height:10px;border-radius:50%;background:#D9D2BE;transition:all .2s}
+.tour-nav a.cur i{background:#2F7A3D;transform:scale(1.4)}
+.tour-nav a.cur span,.tour-nav a:hover span{opacity:1}
+@media (max-width:900px){.tour-nav{display:none}.step{min-height:0}}
+@media (prefers-reduced-motion: reduce){.step{opacity:1;transform:none;transition:none}}
